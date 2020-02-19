@@ -1,0 +1,17 @@
+25 3 4
+6 7 3
+a b c d e f g h i j
+z y x w v u t s r q
+
+
+
+
+ex:
+
+0 0 0 < line1
+this is the settings for rotor 1 2 3  and 4  this can be from 0-25 (0 for a 25 for z)
+1 2 3 < line2
+this is the rotors you are using this can be from 1-8
+a b c d e f g h i j < line 3
+thease are the plugboard settings  they can be from 0-25(10 per line)
+z y x w v u t s r q < line 4
