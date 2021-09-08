@@ -199,30 +199,33 @@ def encode(action,nrp,r_1_s=0,r_2_s=0,r_3_s=0):
 
 while True:
   draw_scr()
-  action = screen.getkey()
-  screen.addch(15,1,action)
-  graphics = [[0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],[0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-  r_1_s = (r_1_s+1)%26
-  nrp[0][0] = r_1_s
-  nrp[0][1] = r_2_s
-  nrp[0][2] = r_3_s
-  if r_1_s == 0:
-    r_2_s+=1
-  r_2_s = r_2_s%26
-  if r_2_s == 0 and r_1_s ==0:
-    r_3_s+=1
-  r_3_s = r_3_s%26
-  action = encode(action,nrp,r_1_s,r_2_s,r_3_s)
-  a = open('encoded_txt.txt','a')
-  a.write(str(action))
-  a.close()
-  screen.addstr(1,1,str(nrp[0][0]))
-  screen.addstr(2,1,str(nrp[0][1]))
-  screen.addstr(3,1,str(nrp[0][2]))
-  screen.addstr(4,1,str(action))
-  graphics[1][ord(str(action))-97] = 262144
-  draw_scr()
-  screen.clear()
+  try:
+    action = screen.getkey()
+    screen.addch(15,1,action)
+    graphics = [[0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],[0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    r_1_s = (r_1_s+1)%26
+    nrp[0][0] = r_1_s
+    nrp[0][1] = r_2_s
+    nrp[0][2] = r_3_s
+    if r_1_s == 0:
+      r_2_s+=1
+    r_2_s = r_2_s%26
+    if r_2_s == 0 and r_1_s ==0:
+        r_3_s+=1
+    r_3_s = r_3_s%26
+    action = encode(action,nrp,r_1_s,r_2_s,r_3_s)
+    a = open('encoded_txt.txt','a')
+    a.write(str(action))
+    a.close()
+    screen.addstr(1,1,str(nrp[0][0]))
+    screen.addstr(2,1,str(nrp[0][1]))
+    screen.addstr(3,1,str(nrp[0][2]))
+    screen.addstr(4,1,str(action))
+    graphics[1][ord(str(action))-97] = 262144
+    draw_scr()
+    screen.clear()
+  except:
+    break
 screen.clear()
 curses.endwin()
 print(nrp)
