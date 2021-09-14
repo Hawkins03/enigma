@@ -7,5 +7,6 @@ Alternately use new.py
 Todo:
 - Make code pretty
   - Show output somewhere
+  - create a drawline function
 - Make ctrl+q ezit tui
 - Make exception handling
