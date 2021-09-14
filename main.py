@@ -8,37 +8,39 @@ changing settings:
 
 '''
 
-
+#opening settings.txt and moving the contents of the first four lines into a list called settings_list
 settings = open('settings.txt','r')
+settings_list = settings.readlines()[0:4]
+settings.close()
+nrp = []
+new_nrp=[]
+print("settings")
+print(settings)
 
-nrp = settings.readlines()[0:4]
-new_nrp = []
-def settings(txt):
-  nrp = []
-  print(txt)
-  c_loc = [0]
-  for i in range(0,len(txt)):
-    if txt[i] == ' ':
-      c_loc.append(i)
-      
-  try:
-    nrp.append(int(txt[0:c_loc[1]]))
-  except:
-    print(c_loc)
-    nrp.append(txt[0:c_loc[1]])    
-  for i in range(1,len(c_loc)-1):
+def settings(input_txt):
+    print(input_txt)
+    breaks = [0]
+    for i in range(0,len(txt)):
+        if txt[i] == ' ':
+            breaks.append(i) #looking for spaces and appending them to the breaks list
     try:
-      nrp.append(int(txt[c_loc[i]+1:c_loc[i+1]]))
+        nrp.append(int(txt[0:breaks[1]])) # appending the first two captured in the breaks list to nrp
     except:
-      nrp.append(txt[c_loc[i]+1:c_loc[i+1]])      
-    c = c_loc[len(c_loc)-1]
-  try:
-    nrp.append(int(txt[c+1:c+2]))
-  except:
-    nrp.append(txt[c+1:c+2])
-  return(nrp)
+        print(breaks)
+        nrp.append(txt[0:breaks[1]])    
+    for i in range(1,len(breaks)-1):
+        try:
+            nrp.append(int(txt[breaks[i]+1:breaks[i+1]]))
+        except:
+            nrp.append(txt[breaks[i]+1:breaks[i+1]])      
+    c = breaks[len(breaks)-1]
+    try:
+        nrp.append(int(txt[c+1:c+2]))
+    except:
+        nrp.append(txt[c+1:c+2])
+    return(nrp)
 for i in range(0,4):
-  new_nrp.append(settings(nrp[i]))
+    new_nrp.append(settings(nrp[i]))
 nrp = new_nrp
 
 '''
@@ -88,17 +90,17 @@ def draw_plugs(y,x,nrp):
   for i in range(0,10):
     screen.addch(y+2*i,x+1,nrp[2][i])
     screen.addch(y+2*i,x+3,nrp[3][i])
-def ltr_numb(ltr):
-  return(ord(ltr)-97)
+
 graphics = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 def draw_scr():
-  y__2 = int(dims[0]/2-2)
-  y_3_4 = int(y__2+y__2/2-5)
-  y_1_4 = int(y__2-y__2/2)
-  x__2 = int((dims[1]-1)/2)
-  x_1_4 = int(x__2/2)
-  x_3_4 = x__2+int(x_1_4/2)
-  screen.addstr(1,int(x__2-(len("THE WWII ENIGMA MACHINE")-len("THE NAZI ENIGMA MACHINE")%2)/2),"THE WWII ENIGMA MACHINE")
+  y_half = int(dims[0]/2-2)
+  y_three_quarters = int(y__2+y__2/2-5)
+  y_one_quarter = int(y__2-y__2/2)
+  x_half = int((dims[1]-1)/2)
+  x_one_quarter = int(x__2/2)
+  x_three_quarters = x__2+int(x_1_4/2)
+  banner = "THE WWII ENIGMA MACHINE"
+  screen.addstr(1,int(x__2-(len(banner)/2),banner))
   for i in range(0,dims[1]):
     screen.addch(5,i,'_')
   for i in range(6,dims[0]):
@@ -107,6 +109,19 @@ def draw_scr():
     screen.addch(y_3_4,i,'-')
 
 
+def draw_keyboard():
+    keyboard_layout="qwertyuiopasdfghjklzxcvbnm"
+    #switcher={10:(5,-41),18:(11,-38),26:(17,-35)} #index of last value:(y offset, first x offset)
+    for i in range(0,26):
+        #updating the chordinates of the letter (y_chord,starting x chord, starting i chord for that group
+        if i<=10:
+            switcher = (5,-41,10)
+        elif i<=18:
+            switcher = (11,-38)
+        else:
+            switcher = (17,-35)
+        screen.addch(y_3_4+switcher[0],x_3_4+switcher[1]+i*9
+'''
   screen.addch(y_3_4+5,x_3_4-41,'q',graphics[1][ltr_numb('q')])
   screen.addch(y_3_4+5,x_3_4-32,'w',graphics[1][ltr_numb('w')])
   screen.addch(y_3_4+5,x_3_4-23,'e',graphics[1][ltr_numb('e')])
@@ -133,6 +148,7 @@ def draw_scr():
   screen.addch(y_3_4+17,x_3_4+1,'b',graphics[1][ltr_numb('b')])
   screen.addch(y_3_4+17,x_3_4+11,'n',graphics[1][ltr_numb('n')])
   screen.addch(y_3_4+17,x_3_4+20,'m',graphics[1][ltr_numb('m')])
+'''
 
   x__2 = x_3_4-2
   y__2 = y_1_4-1
