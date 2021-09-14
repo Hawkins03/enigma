@@ -113,14 +113,15 @@ def draw_keyboard():
     keyboard_layout="qwertyuiopasdfghjklzxcvbnm"
     #switcher={10:(5,-41),18:(11,-38),26:(17,-35)} #index of last value:(y offset, first x offset)
     for i in range(0,26):
-        #updating the chordinates of the letter (y_chord,starting x chord, starting i chord for that group
+        #updating the chordinates of the letter (y_chord,starting x chord, smallest i value in the group
         if i<=10:
-            switcher = (5,-41,10)
+            switcher = (5,-41,0)
         elif i<=18:
-            switcher = (11,-38)
+            switcher = (11,-38,11)
         else:
-            switcher = (17,-35)
-        screen.addch(y_3_4+switcher[0],x_3_4+switcher[1]+i*9
+            switcher = (17,-35,18)
+        curr_letter = keyboard_layout[i]
+        screen.addch(y_3_4+switcher[0],x_3_4+switcher[1]+i*9,curr_letter,graphics[1][ord(curr_letter)-97])
 '''
   screen.addch(y_3_4+5,x_3_4-41,'q',graphics[1][ltr_numb('q')])
   screen.addch(y_3_4+5,x_3_4-32,'w',graphics[1][ltr_numb('w')])
