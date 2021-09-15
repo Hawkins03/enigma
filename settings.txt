@@ -2,16 +2,15 @@
 6 7 3
 a b c d e f g h i j
 z y x w v u t s r q
+---------------------------------------------
+Only settings above this line:
 
-
-
-
-ex:
-
+Rotor Position setting (how rotated the rotors are) (range 0 to 26)
 0 0 0 < line1
-this is the settings for rotor 1 2 3  and 4  this can be from 0-25 (0 for a 25 for z)
+
+Rotor Selection (range 1 to 8)
 1 2 3 < line2
-this is the rotors you are using this can be from 1-8
+
+Plugboard settings: (range a-z, 10 maximum)
 a b c d e f g h i j < line 3
-thease are the plugboard settings  they can be from 0-25(10 per line)
 z y x w v u t s r q < line 4

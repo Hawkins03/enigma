@@ -7,16 +7,36 @@ a.close()
 changing settings:
 
 '''
+class enigma():
+    def settings():
+        pass
+    def __init__(self):
+        '''
+        Line 1: rotor settings
+        Line 2: rotor selections
+        Line 3: Plugboard pt 1
+        Line 4: plugboard pt 2
+        '''
+        settings = open('settings.txt','r')
+        settings_list = settings.readlines()[0:4]
+        settings.close()
+        
+        formatted_settings_list = []
 
-#opening settings.txt and moving the contents of the first four lines into a list called settings_list
-settings = open('settings.txt','r')
-settings_list = settings.readlines()[0:4]
-settings.close()
-nrp = []
-new_nrp=[]
-print("settings")
-print(settings)
+        #format settings list (remove \n) and find spaces
+        
+        for i in settings_list:
+            formatted_settings_list.append(i[0:len(i)-1])
+            breaks=[0]
+            for j in range(0,len(formatted_settings_list)):
+                if i[j] == ' ':
+                    breaks.append(j)
+        settings_list = formatted_settings_list 
+        print(settings_list)
+            
+enigma()
 
+'''
 def settings(input_txt):
     print(input_txt)
     breaks = [0]
@@ -43,11 +63,10 @@ for i in range(0,4):
     new_nrp.append(settings(nrp[i]))
 nrp = new_nrp
 
-'''
 
-done changing settings:
+Done Changing Settings
 
-'''
+
 screen = curses.initscr()
 screen.keypad(1)
 curses.echo(0)
@@ -122,34 +141,7 @@ def draw_keyboard():
             switcher = (17,-35,18)
         curr_letter = keyboard_layout[i]
         screen.addch(y_3_4+switcher[0],x_3_4+switcher[1]+i*9,curr_letter,graphics[1][ord(curr_letter)-97])
-'''
-  screen.addch(y_3_4+5,x_3_4-41,'q',graphics[1][ltr_numb('q')])
-  screen.addch(y_3_4+5,x_3_4-32,'w',graphics[1][ltr_numb('w')])
-  screen.addch(y_3_4+5,x_3_4-23,'e',graphics[1][ltr_numb('e')])
-  screen.addch(y_3_4+5,x_3_4-14,'r',graphics[1][ltr_numb('r')])
-  screen.addch(y_3_4+5,x_3_4-4,'t',graphics[1][ltr_numb('t')])
-  screen.addch(y_3_4+5,x_3_4+5,'y',graphics[1][ltr_numb('y')])
-  screen.addch(y_3_4+5,x_3_4+14,'u',graphics[1][ltr_numb('u')])
-  screen.addch(y_3_4+5,x_3_4+23,'i',graphics[1][ltr_numb('i')])
-  screen.addch(y_3_4+5,x_3_4+32,'o',graphics[1][ltr_numb('o')])
-  screen.addch(y_3_4+5,x_3_4+41,'p',graphics[1][ltr_numb('p')])
-  screen.addch(y_3_4+11,x_3_4-38,'a',graphics[1][ltr_numb('a')])
-  screen.addch(y_3_4+11,x_3_4-29,'s',graphics[1][ltr_numb('s')])
-  screen.addch(y_3_4+11,x_3_4-20,'d',graphics[1][ltr_numb('d')])
-  screen.addch(y_3_4+11,x_3_4-11,'f',graphics[1][ltr_numb('f')])
-  screen.addch(y_3_4+11,x_3_4-2,'g',graphics[1][ltr_numb('g')])
-  screen.addch(y_3_4+11,x_3_4+8,'h',graphics[1][ltr_numb('h')])
-  screen.addch(y_3_4+11,x_3_4+17,'j',graphics[1][ltr_numb('j')])
-  screen.addch(y_3_4+11,x_3_4+26,'k',graphics[1][ltr_numb('k')])
-  screen.addch(y_3_4+11,x_3_4+35,'l',graphics[1][ltr_numb('l')])
-  screen.addch(y_3_4+17,x_3_4-35,'z',graphics[1][ltr_numb('z')])
-  screen.addch(y_3_4+17,x_3_4-26,'x',graphics[1][ltr_numb('x')])
-  screen.addch(y_3_4+17,x_3_4-17,'c',graphics[1][ltr_numb('c')])
-  screen.addch(y_3_4+17,x_3_4-8,'v',graphics[1][ltr_numb('v')])
-  screen.addch(y_3_4+17,x_3_4+1,'b',graphics[1][ltr_numb('b')])
-  screen.addch(y_3_4+17,x_3_4+11,'n',graphics[1][ltr_numb('n')])
-  screen.addch(y_3_4+17,x_3_4+20,'m',graphics[1][ltr_numb('m')])
-'''
+
 
   x__2 = x_3_4-2
   y__2 = y_1_4-1
@@ -246,3 +238,4 @@ while True:
 screen.clear()
 curses.endwin()
 print(nrp)
+'''
