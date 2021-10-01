@@ -46,7 +46,6 @@ class backend():
             self.rotor_settings.append(self.settings_list[0][i])
 
         #generating rotors
-        rotor_list=['ekmflgdqvzntowyhxuspaibrcj','ajdksiruxblhwtmcqgznpyfvoe','bdfhjlcprtxvznyeiwgakmusqo','esovpzjayquirhxlnftgkdcmwb','vzbrgityupsdnhlxawmjqofeck','jpgvoumfyqbenhzrdkasxlictw','nzjhgrcxmyswboufaivlpekqdt','fkqhtlxocbjspdzramewniuygv']
         self.rotors = []
         for i in settings_list[1]:
             self.rotors.append(rotor_list[i]) # reading in the selected rotors
