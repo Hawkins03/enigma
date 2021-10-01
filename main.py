@@ -1,16 +1,43 @@
 import curses
 import sys
+from enum import Enum
+
 a = open('encoded_txt.txt','w')
 a.close()
+
+class Direction(Enum): # list is [x_direction,y_direction]
+    LEFT  = [-1,0]
+    RIGHT = [1, 0]
+    UP    = [0,-1]
+    DOWN  = [0, 1]
+
 '''
 
 changing settings:
 
 '''
 class enigma():
-    def settings():
-        pass
-    def __init__(self):
+    def __init__(self): 
+        self.generate_settings()
+
+        #init screen
+
+        screen = curses.initscr()
+        screen.keypad(1)
+        curses.echo(0)
+        curses.curs_set(0)
+        screen.clear()
+        screen.refresh()
+        dims = screen.getmaxyx()
+        
+        #initalizing rotors
+        self.rotor_1_settings = self.settings_list[0][0]
+        self.rotor_2_settings = self.settings_list[0][1]
+        self.rotor_3_settings = self.settings_list[0][2]
+
+        self.end_screen(screen)
+
+    def generate_settings(self):
         '''
         Line 1: rotor settings
         Line 2: rotor selections
@@ -31,13 +58,28 @@ class enigma():
             for j in range(0,len(formatted_settings_list)):
                 if i[j] == ' ':
                     breaks.append(j)
-        settings_list = formatted_settings_list 
+        self.settings_list = formatted_settings_list 
         print(settings_list)
-            
+    
+    def end_screen(self, screen):
+        screen.clear()
+        curses.endwin()
+
+
+
+    def draw_line(x_start, y_start, direction):
+        if not isinstance(direction, Direction):
+            raise TypeError("direction must be an instance of Direction Enum")
+
+
+        
+
+
 enigma()
 
 '''
 def settings(input_txt):
+    dims = 
     print(input_txt)
     breaks = [0]
     for i in range(0,len(txt)):
