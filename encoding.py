@@ -10,10 +10,10 @@ a.close()
 changing settings:
 
 '''
-class backend():
+class Backend():
     def __init__(self): 
         self.generate_setting_list()
-        self.inatalize_settings()        
+        #self.initalize_settings()        
 
     def generate_setting_list(self):
         '''
@@ -23,31 +23,35 @@ class backend():
         Line 4: plugboard pt 2
         '''
         settings = open('settings.txt','r')
-        settings_list = settings.readlines()[0:4]
+        s = settings.readlines()[:4]
         settings.close()
-        
-        formatted_settings_list = []
+        settings = s
+        formatted_settings = []
+        breaks = [[],[],[],[]]
 
-        #format settings list (remove \n) and find spaces
-        
-        for i in settings_list:
-            formatted_settings_list.append(i[0:len(i)-1])
-            breaks=[0]
-            for j in range(0,len(formatted_settings_list)):
-                if i[j] == ' ':
-                    breaks.append(j)
-        self.settings_list = formatted_settings_list 
-        print(settings_list)
+        #removing \n and find spaces (breaks)
+        for i in settings:
+            formatted_settings.append(i[:len(i)-1])
+        self.settings = formatted_settings
+
+        #finding all the breaks
+        for i in range(4):
+            for j in range(len(self.settings[i])):
+                if self.settings[i][j] == ' ':
+                    breaks[i].append(j)
+
 
     def initalize_settings(self):
         #initalizing rotors
         self.rotor_settings = []
         for i in range(3):
-            self.rotor_settings.append(self.settings_list[0][i])
+            self.rotor_settings.append(self.settings[0][i])
 
         #generating rotors
+        rotor_list = open('.rotors.txt','r').readlines()
+        print(rotor_list)
         self.rotors = []
-        for i in settings_list[1]:
+        for i in self.settings[1]:
             self.rotors.append(rotor_list[i]) # reading in the selected rotors
         self.rotors.append('ejmzalyxvbwfcrquontspikhgd')
 
@@ -55,12 +59,12 @@ class backend():
         self.alpha='abcdefghijklmnopqrstuvwxyz'
 
         #plugboard pairs
-        self.pairs = [settings_list[2],settings_list[3]]    
+        self.pairs = [self.settings[2],self.settings[3]]    
     
     def rotor(self, rotor_number, plaintext):
         for i in range(0,len(plaintext)):
             if plaintext == self.alpha[i]:
-                return rotor[rotor_number][i-rotor_settings[rotor_number]
+                return rotor[rotor_number][i-rotor_settings[rotor_number]]
 
     def plugboard(self,plaintext):
         for i in range(10):
@@ -167,3 +171,5 @@ screen.clear()
 curses.endwin()
 print(nrp)
 '''
+
+backend = Backend()
