@@ -8,7 +8,7 @@ Todo:
 - Make code pretty
   - Show output somewhere
   - create a drawline function
-- Make ctrl+q ezit tui
+- Make ctrl+q exit tui
 - Make exception handling
 
 - Make it read terminal args so that --nointerface or -n makes it run without tui and -h or --help prints a help message
