@@ -10,3 +10,9 @@ Todo:
   - create a drawline function
 - Make ctrl+q ezit tui
 - Make exception handling
+
+- Make it read terminal args so that --nointerface or -n makes it run without tui and -h or --help prints a help message
+- Update rotors in the encrypt function
+- save updated rotors to settings function
+- make settings window
+- make british version
