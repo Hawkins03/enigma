@@ -1,5 +1,7 @@
 import curses
 import sys
+import textwrap
+import copy
 from enum import Enum
 import encoding
 
@@ -48,6 +50,17 @@ ends the screen
 def endScreen(screen):
     screen.clear()
     curses.endwin()
+
+
+def drawStrings(screen, plaintext, ciphertext, offset = 0):
+    try:
+        screen.addstr(1, 27, plaintext)
+        screen.addstr(13, 27, ciphertext)
+        screen.refresh()
+    except Exception as e:
+        print("ERROR ERORR ERROR")
+        endScreen(screen) 
+        print(e)
 
 '''
 draws the keyboard
@@ -106,31 +119,42 @@ try:
     
     halfYMain = getYMid(activeWin)
     activeKeyboard = screen.subwin(16, xMax, yMax - 16, 0)
-    activeEncrypted = screen.subwin(25, xMax, 8, 0)
+    activeOutput = screen.subwin(25, xMax, 8, 0)
     inactiveKeyboard = screen.subwin(16, xMax - 8, yMax - 16, 8)
-    inactiveEncrypted = screen.subwin(25, xMax - 8, 8, 8)
+    inactiveOutput = screen.subwin(25, xMax - 8, 8, 8)
 
     #drawing basic stuff
     drawBlankScreen(header, screen)
     drawKeyboard(activeWin)
     encrypter = encoding.Encoding()
-    encryptedStr = ""
+    plaintext = "Plaintext:  "
+    ciphertext = "Ciphertext: "
+    
+
 
     end = False
     while (not end):
         action = ord(chr(screen.getch()).lower())
         if action >= 97 and action <= 122:
             drawKeyboard(activeKeyboard, action - 97)
-            encryptedStr += encrypter.encrypt(chr(action))
+            plaintext += chr(action)
+            ciphertext += encrypter.encrypt(chr(action))
+        elif action == 10:
+            plaintext += "\n";
+            ciphertext += "\n";
+        elif action == 8:
+            plaintext = plaintext[0, len(plaintext) - 1]
+            ciphertext = ciphertext[0, len(ciphertext) - 1]
         else:
             end = True;
+        drawStrings(activeOutput, plaintext, ciphertext)
         screen.refresh()
     encrypter.close(False)
     endScreen(screen) #ends program
-    print("your encrypted string is: " + encryptedStr)
+    print(plaintext + "\n\n" + ciphertext)
 
     f = open("output.txt", "w");
-    f.write("your encrypted string is: " + encryptedStr)
+    f.write(plaintext + "\n\n" + ciphertext)
     f.close()
 except Exception as e:
     endScreen(screen)
