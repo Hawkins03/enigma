@@ -1,3 +1,9 @@
+'''
+A few util packages for encoding.py
+
+@author Hawkins Peterson
+@version 12.19.21
+'''
 def remove_newlines(string):
     return string[:len(string)-1]
 

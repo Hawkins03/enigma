@@ -1,20 +1,18 @@
 import curses
 import sys
-import util
 from enum import Enum
-
-a = open('encoded_txt.txt','w')
-a.close()
+import util
 
 '''
 
 changing settings:
 
 '''
-class Backend():
+class Encoding():
     def __init__(self): 
         self.generate_settings()
-        self.initalize_settings()        
+        self.initalize_settings()
+        self.concatEncryptions = "";
 
     def generate_settings(self):
         '''
@@ -90,6 +88,7 @@ class Backend():
         for i in range(2,-1):
             self.ciphertext = self.rotor(i,self.ciphertext)
         self.ciphertext = self.plugboard(self.ciphertext)
+        self.concatEncryptions += self.ciphertext + "\n"
         return self.ciphertext
 
     def update_rotors(self):
@@ -99,9 +98,21 @@ class Backend():
                 if ord(self.rotor_updates[i][j])-97 == self.settings[0][i] and i != 3:
                     self.settings[0][i+1]+=1
                 self.settings[0][i] = self.settings[0][i]%26
-    def writeSettings(self):
+
+    def close(self, save = True):
+        settingLines = open("settings.txt", "r").readlines();
+        settingLines[0] = ' '.join(map(str, self.settings[0])) + "\n"
+        settingLines[1] = ' '.join(map(str, self.settings[1])) + "\n"
+        settingLines[2] = ' '.join(map(str, self.settings[2])) + "\n"
+        settingLines[3] = ' '.join(map(str, self.settings[3])) + "\n"
+        f = open("settings.txt", "w")
+        f.writelines(settingLines)
+        f.close()
+        if save:
+            f = open("output.txt", "w")
+            f.write(self.concatEncryptions)
+            f.close()
 
 
-
-backend = Backend()
-print(backend.encrypt('a'))
+encoder = Encoding()
+print(encoder.encrypt('a'))

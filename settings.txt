@@ -1,9 +1,9 @@
-25 3 4
+16 3 4
 6 7 3
 a b c d e f g h i j
 z y x w v u t s r q
 ---------------------------------------------
-Only settings above this line:
+Put only settings above this line:
 
 Rotor Position setting (how rotated the rotors are) (range 0 to 26)
 0 0 0 < line1
