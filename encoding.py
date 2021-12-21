@@ -1,5 +1,6 @@
 import curses
 import sys
+import util
 from enum import Enum
 
 a = open('encoded_txt.txt','w')
@@ -12,59 +13,64 @@ changing settings:
 '''
 class Backend():
     def __init__(self): 
-        self.generate_setting_list()
-        #self.initalize_settings()        
+        self.generate_settings()
+        self.initalize_settings()        
 
-    def generate_setting_list(self):
+    def generate_settings(self):
         '''
         Line 1: rotor settings
         Line 2: rotor selections
         Line 3: Plugboard pt 1
         Line 4: plugboard pt 2
         '''
-        settings = open('settings.txt','r')
-        s = settings.readlines()[:4]
-        settings.close()
-        settings = s
+
+        #reading settings and setting self.settings = to the first 4 lines of the settings file
+        f = open('settings.txt','r')
+        self.settings = f.readlines()[:4]
+        f.close()
+
         formatted_settings = []
-        breaks = [[],[],[],[]]
-
-        #removing \n and find spaces (breaks)
-        for i in settings:
-            formatted_settings.append(i[:len(i)-1])
-        self.settings = formatted_settings
-
-        #finding all the breaks
+        breaks = []
+        #removing newlines, finding the spaces, and then changing the string into lists
         for i in range(4):
-            for j in range(len(self.settings[i])):
-                if self.settings[i][j] == ' ':
-                    breaks[i].append(j)
-
+            self.settings[i] = util.remove_newlines(self.settings[i])
+            breaks.append(util.find_breaks(self.settings[i],' '))
+            self.settings[i] = util.string_to_list(self.settings[i],breaks[i])
 
     def initalize_settings(self):
         #initalizing rotors
         self.rotor_settings = []
         for i in range(3):
-            self.rotor_settings.append(self.settings[0][i])
+            self.rotor_settings.append(self.settings[0][i-1])
 
         #generating rotors
         rotor_list = open('.rotors.txt','r').readlines()
-        print(rotor_list)
+        for i in range(len(rotor_list)):
+            rotor_list[i] = util.remove_newlines(rotor_list[i])
+
         self.rotors = []
         for i in self.settings[1]:
             self.rotors.append(rotor_list[i]) # reading in the selected rotors
-        self.rotors.append('ejmzalyxvbwfcrquontspikhgd')
+        self.rotors.append('ejmzalyxvbwfcrquontspikhgd') #reflector
 
-        #other rotors settings
         self.alpha='abcdefghijklmnopqrstuvwxyz'
 
         #plugboard pairs
-        self.pairs = [self.settings[2],self.settings[3]]    
-    
+        self.pairs = [self.settings[2],self.settings[3]]
+
+        allRotorUpdates = [['r'],['f'],['w'],['k'],['a'],['a','n'],['a','n'],['a','n']]
+        
+        self.rotor_updates = []
+        for i in range(3):
+            self.rotor_updates.append(allRotorUpdates[self.settings[1][i]])
+
     def rotor(self, rotor_number, plaintext):
-        for i in range(0,len(plaintext)):
-            if plaintext == self.alpha[i]:
-                return rotor[rotor_number][i-rotor_settings[rotor_number]]
+        for i in range(0,len(self.alpha)):
+            if self.ciphertext == self.alpha[i]:
+                if rotor_number < 3:
+                    return self.rotors[rotor_number][(i+self.settings[0][rotor_number])%26]
+                else:
+                    return self.rotors[rotor_number][i]
 
     def plugboard(self,plaintext):
         for i in range(10):
@@ -74,102 +80,28 @@ class Backend():
                 plaintext = self.pairs[0][i]
         return plaintext
 
-    def encrypt(plaintext):
-        plaintext = plugboard(plaintext)
+    def encrypt(self, plaintext):
+        self.ciphertext = plaintext
+        ciphertext = ""
+        self.update_rotors()
+        self.ciphertext = self.plugboard(self.ciphertext)
         for i in range(4):
-            rotor(i,plaintext)
+            self.ciphertext = self.rotor(i,self.ciphertext)
         for i in range(2,-1):
-            rotor(i,plaintext)
-        plaintext = plugboard(plaintext)
-        print(plaintext)
-        return plaintext
+            self.ciphertext = self.rotor(i,self.ciphertext)
+        self.ciphertext = self.plugboard(self.ciphertext)
+        return self.ciphertext
+
+    def update_rotors(self):
+        self.settings[0][0]+=1
+        for i in range(3):
+            for j in range(len(self.rotor_updates[i])-1):
+                if ord(self.rotor_updates[i][j])-97 == self.settings[0][i] and i != 3:
+                    self.settings[0][i+1]+=1
+                self.settings[0][i] = self.settings[0][i]%26
+    def writeSettings(self):
 
 
-'''
-def plugboard(action,pairs):
-  for i in range(0,10):
-    if action == pairs[0][i]:
-      action = pairs[1][i]
-    if action == pairs[1][i]:
-      action = pairs[0][i]
-  return(action)
-
-
-def encode(action,nrp,r_1_s=0,r_2_s=0,r_3_s=0):
-  pairs=[]
-  rotors=['ekmflgdqvzntowyhxuspaibrcj','ajdksiruxblhwtmcqgznpyfvoe','bdfhjlcprtxvznyeiwgakmusqo','esovpzjayquirhxlnftgkdcmwb','vzbrgityupsdnhlxawmjqofeck','jpgvoumfyqbenhzrdkasxlictw','nzjhgrcxmyswboufaivlpekqdt','fkqhtlxocbjspdzramewniuygv']
-  alpha='abcdefghijklmnopqrstuvwxyz'
-  reflector = 'ejmzalyxvbwfcrquontspikhgd'
-  rotor1 = rotors[nrp[1][0]-1]
-  rotor2 = rotors[nrp[1][1]-1]
-  rotor3 = rotors[nrp[1][2]-1]
-  pairs.append(nrp[2])
-  pairs.append(nrp[3])
-  action = plugboard(action,pairs)
-  for i in range(0,len(alpha)):
-    if action == alpha[i]:
-      action = rotor1[(i-r_1_s)%26]
-      break
-  for i in range(0,len(alpha)):
-    if action == alpha[i]:
-      action = rotor2[(i-r_2_s)%26]
-      break
-  for i in range(0,len(alpha)):
-    if action == alpha[i]:
-      action = rotor3[(i-r_3_s)%26]
-      break
-  for i in range(0,len(alpha)):
-    if action == alpha[i]:
-      action = reflector[i]
-      break
-  for i in range(0,len(alpha)):
-    if action == rotor3[i]:
-      action = alpha[(i+r_3_s)%26]
-      break
-  for i in range(0,len(alpha)):
-    if action == rotor2[i]:
-      action = alpha[(i+r_2_s)%26]
-      break
-  for i in range(0,len(alpha)):
-    if action == rotor1[i]:
-      action = alpha[(i+r_1_s)%26]
-      break
-  action = plugboard(action,pairs)
-  print(action)
-  return(action)
-
-while True:
-  draw_scr()
-  try:
-    action = screen.getkey()
-    screen.addch(15,1,action)
-    graphics = [[0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],[0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-    r_1_s = (r_1_s+1)%26
-    nrp[0][0] = r_1_s
-    nrp[0][1] = r_2_s
-    nrp[0][2] = r_3_s
-    if r_1_s == 0:
-      r_2_s+=1
-    r_2_s = r_2_s%26
-    if r_2_s == 0 and r_1_s ==0:
-        r_3_s+=1
-    r_3_s = r_3_s%26
-    action = encode(action,nrp,r_1_s,r_2_s,r_3_s)
-    a = open('encoded_txt.txt','a')
-    a.write(str(action))
-    a.close()
-    screen.addstr(1,1,str(nrp[0][0]))
-    screen.addstr(2,1,str(nrp[0][1]))
-    screen.addstr(3,1,str(nrp[0][2]))
-    screen.addstr(4,1,str(action))
-    graphics[1][ord(str(action))-97] = 262144
-    draw_scr()
-    screen.clear()
-  except:
-    break
-screen.clear()
-curses.endwin()
-print(nrp)
-'''
 
 backend = Backend()
+print(backend.encrypt('a'))
