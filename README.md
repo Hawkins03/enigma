@@ -6,14 +6,12 @@ Alternately use new.py
 NOTE. This is still in progress, to see the working version (that has atrotious code I wish I didn't write (it was four years ago) check out the other branch
 
 Todo:
-- Make code pretty
-  - Show output somewhere
-  - create a drawline function
+- Show encrypted output durring programming
 - Make ctrl+q exit tui
 - Make exception handling
-
-- Make it read terminal args so that --nointerface or -n makes it run without tui and -h or --help prints a help message
-- Update rotors in the encrypt function
-- save updated rotors to settings function
-- make settings window
-- make british version
+- Make settings window
+    Encrypt side:
+    - Make it read terminal args so that you can just run encode [plainText] and it will print the encoded text
+        because of catting files in as args, I don't have to add args to pull from files or output to files :D
+    - make british version (ie without the error of one letter not being encode to itself)
+    - make updated german one (with extra rotor)
