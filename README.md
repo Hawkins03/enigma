@@ -13,5 +13,4 @@ Todo:
     Encrypt side:
     - Make it read terminal args so that you can just run encode [plainText] and it will print the encoded text
         because of catting files in as args, I don't have to add args to pull from files or output to files :D
-    - make british version (ie without the error of one letter not being encode to itself)
     - make updated german one (with extra rotor)

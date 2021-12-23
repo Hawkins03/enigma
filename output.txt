@@ -1,3 +1,239 @@
-Plaintext:  
+rotors chosen:  #6  #7  #3
+rotor settings: #05 #21 #24 
 
-Ciphertext: 
+plaintext:  aaaaaa 
+ciphertext: fywyzv
+
+rotors chosen:  #6  #7  #3
+rotor settings: #11 #21 #24 
+
+plaintext:  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+ciphertext: zqukuecnobcglildtckzquczunozmsavnqphfqrxdkitxjexmruczeysys
+rotors chosen:  #6  #7  #3
+rotor settings: #22 #00 #24 
+
+plaintext:  asdfasdfasdfasdf 
+ciphertext: kyxrybrzxnigxpwm
+
+rotors chosen:  #6  #7  #3
+rotor settings: #13 #01 #24 
+
+plaintext:  asdfasdf 
+ciphertext: eejgertt
+
+rotors chosen:  #6  #7  #3
+rotor settings: #22 #02 #24 
+
+plaintext:  asdasdasdasdasdasdasdasdasdasdasdasdasdasdhelllo colten! 
+ciphertext: vsgvclnuvciuubnjecoxzzfbaajfzytrohvmwltgibmzhpgu gmetnd!
+
+rotors chosen:  #6  #7  #3
+rotor settings: #03 #07 #24 
+
+plaintext:  asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfdsfasdfadfs 
+ciphertext: fgabvrfgyilnboxawyapmllwnbznpdosrsgjgmjnymxdpqxrunngbbdqbjardlg
+
+rotors chosen:  #6  #7  #3
+rotor settings: #19 #12 #24 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #19 #12 #24 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #19 #12 #24 
+
+plaintext:  d 
+ciphertext: u
+
+rotors chosen:  #6  #7  #3
+rotor settings: #20 #12 #24 
+
+plaintext:  aaaaaa 
+ciphertext: riiezo
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #13 #24 
+
+plaintext:  z 
+ciphertext: a
+
+rotors chosen:  #6  #7  #3
+rotor settings: #02 #13 #24 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #02 #13 #24 
+
+plaintext:  aaaaaa 
+ciphertext: qmnsob
+
+rotors chosen:  #6  #7  #3
+rotor settings: #08 #13 #24 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #08 #13 #24 
+
+plaintext:  a 
+ciphertext: e
+
+rotors chosen:  #6  #7  #3
+rotor settings: #09 #13 #24 
+
+plaintext:  a 
+ciphertext: n
+
+rotors chosen:  #6  #7  #3
+rotor settings: #10 #13 #24 
+
+plaintext:  aaaaaaaaaaaaaaaaaaa 
+ciphertext: ztugtjvqepefdrcnwip
+
+rotors chosen:  #6  #7  #3
+rotor settings: #05 #15 #24 
+
+plaintext:  aa 
+ciphertext: iz
+
+rotors chosen:  #6  #7  #3
+rotor settings: #07 #15 #24 
+
+plaintext:  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+ciphertext: ayqjbrzqxaiwrzdspaeewyqqmlchjfylgmjpnhfvd
+
+rotors chosen:  #6  #7  #3
+rotor settings: #25 #19 #25 
+
+plaintext:  a 
+ciphertext: h
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #21 #00 
+
+plaintext:  a 
+ciphertext: s
+
+rotors chosen:  #6  #7  #3
+rotor settings: #02 #21 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #02 #21 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #02 #21 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #02 #21 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #02 #21 #00 
+
+plaintext:  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+ciphertext: zubqlwlrgcqdwkjknfymxxjfjvnpbobzckdtfmrchousujncfecvozeoxmfnyugvpzjzvrzokbsuwcttnup
+
+rotors chosen:  #6  #7  #3
+rotor settings: #13 #01 #00 
+
+plaintext:  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+ciphertext: huwioogkkcohutlbxjtfabnimjokgtbsmhweeydjdper
+
+rotors chosen:  #6  #7  #3
+rotor settings: #09 #05 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #09 #05 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #09 #05 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #09 #05 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #09 #05 #00 
+
+plaintext:  asdfasdfasdfasdfasdfasdfasdfasdfasdfasdf 
+ciphertext: wrpjbxubyrczsmuqjdljzxinuaeunlbhciqehsfp
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #09 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #09 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #09 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #09 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #09 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #09 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #09 #00 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #09 #00 
+
+plaintext:  asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfadfsfadfsasdfasdfasdfasfadsfasdf 
+ciphertext: lsqxrohtohbqhqtjiymgakzvmfrfbvuxpnrokhcywugsfkkknrsxuchatczdkpsbetbxqqiz
+

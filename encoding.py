@@ -61,44 +61,67 @@ class Encoding():
         self.rotor_updates = []
         for i in range(3):
             self.rotor_updates.append(allRotorUpdates[self.settings[1][i]])
+    
+    def getFancyRotorSettings(self):
+        toReturn = "rotors chosen:  #%d  #%d  #%d" % (self.settings[1][0], self.settings[1][1], self.settings[1][2])
+        toReturn += "\nrotor settings: #" + str(self.settings[0][0]).zfill(2) + " #" + str(self.settings[0][1]).zfill(2) + " #" + str(self.settings[0][2]).zfill(2)
+        return toReturn
+
+
+    def getFancyRotorArray(self):
+        rotorSettings = self.settings[0]
+        toReturn = [self.settings[1], [["a", "a", "a"], ["b", "b", "b"], ["c", "c", "c"]]]
+        for y in range(3):
+            for x in range(3):
+                toReturn[1][y][x] = "a"
+                toReturn[1][y][x] = self.rotors[y][(self.settings[0][y] + x - 1) % 26]
+        return toReturn
 
     def rotor(self, rotor_number, plaintext):
         for i in range(0,len(self.alpha)):
-            if self.ciphertext == self.alpha[i]:
+            if plaintext == self.alpha[i]:
                 if rotor_number < 3:
+                    position = self.settings[0][rotor_number]
                     return self.rotors[rotor_number][(i+self.settings[0][rotor_number])%26]
                 else:
                     return self.rotors[rotor_number][i]
 
-    def plugboard(self,plaintext):
+
+    def updateRotors(self):
+        self.settings[0][0] = (self.settings[0][0] + 1) % 26
+        for y in range(3):
+            for x in self.rotor_updates[y]:
+                if self.rotors[y][self.settings[0][y]] == x:
+                    if y < 2:
+                        self.settings[0][y] = (self.settings[0][y] + 1) % 26
+                        self.settings[0][y + 1] = (self.settings[0][y + 1] + 1) % 26
+
+    def plugboard(self, plaintext):
         for i in range(10):
-            if plaintext == self.pairs[0][i]:
-                plaintext = self.pairs[1][i]
-            if plaintext == self.pairs[1][i]:
-                plaintext = self.pairs[0][i]
+            if plaintext == self.settings[2][i]:
+                plaintext = self.settings[3][i]
+            elif plaintext == self.settings[3][i]:
+                plaintext = self.settings[2][i]
         return plaintext
 
-    def encrypt(self, plaintext):
-        self.ciphertext = plaintext
-        ciphertext = ""
-        self.update_rotors()
-        self.ciphertext = self.plugboard(self.ciphertext)
+    def encrypt(self, plaintext, output = True):
+        outputStr = plaintext + " "
+        ciphertext = self.plugboard(plaintext)
+        outputStr += ciphertext + " "
         for i in range(4):
-            self.ciphertext = self.rotor(i,self.ciphertext)
-        for i in range(2,-1):
-            self.ciphertext = self.rotor(i,self.ciphertext)
-        self.ciphertext = self.plugboard(self.ciphertext)
-        self.concatEncryptions += self.ciphertext + "\n"
-        return self.ciphertext
-
-    def update_rotors(self):
-        self.settings[0][0]+=1
+            ciphertext = self.rotor(i, ciphertext)
+            outputStr += ciphertext
         for i in range(3):
-            for j in range(len(self.rotor_updates[i])-1):
-                if ord(self.rotor_updates[i][j])-97 == self.settings[0][i] and i != 3:
-                    self.settings[0][i+1]+=1
-                self.settings[0][i] = self.settings[0][i]%26
-
+            ciphertext = self.rotor(2 - i, ciphertext)
+            outputStr += ciphertext
+        self.updateRotors()
+        ciphertext = self.plugboard(ciphertext)
+        outputStr += " " + ciphertext + " " + " ".join(map(str, self.settings[0]))
+        if output:
+            print(outputStr)
+        self.concatEncryptions += ciphertext + "\n"
+        return ciphertext
+    
     def close(self, save = True):
         settingLines = open("settings.txt", "r").readlines();
         settingLines[0] = ' '.join(map(str, self.settings[0])) + "\n"
@@ -109,10 +132,13 @@ class Encoding():
         f.writelines(settingLines)
         f.close()
         if save:
-            f = open("output.txt", "w")
+            f = open("output.txt", "a")
             f.write(self.concatEncryptions)
             f.close()
 
-
+#debug by pprint("rotor setting: " + str(self.settings[0][rotor_number]))
 encoder = Encoding()
-print(encoder.encrypt('a'))
+#for i in range(26):
+    #letter = chr(i + 97)
+    #encoder.encrypt(letter)
+#encoder.close()
