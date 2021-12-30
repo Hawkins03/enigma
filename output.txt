@@ -249,3 +249,9 @@ rotor settings: #23 #19 #01
 plaintext:  hello noises , asdf.,    asdfasdfasdf?! 
 ciphertext: abyic msgjha , lydo.,    rjcsrlzbcpqu?!
 
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+
