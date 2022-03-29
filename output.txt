@@ -255,3 +255,51 @@ rotor settings: #01 #23 #02
 plaintext:   
 ciphertext: 
 
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+
+rotors chosen:  #6  #7  #3
+rotor settings: #01 #23 #02 
+
+plaintext:   
+ciphertext: 
+

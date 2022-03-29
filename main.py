@@ -34,24 +34,29 @@ class enigma:
         self.rotors = activeWin.subwin(11, 30, 9, self.getXMid(activeWin) - 15)
 
         self.encrypter = encoding.Encoding()
-        self.rotorSettings = self.encrypter.getFancyRotorSettings()
+        self.rotorSettings = self.encrypter.getRotorSettings()
         self.plaintext = ""
         self.ciphertext = ""
         self.keyboardAlphabet = "qwertyuiopasdfghjklzxcvbnm"
 
+    # gets middle y value (because I'm lazy)
     def getYMid(self, screen):
         return int(screen.getmaxyx()[0] / 2)
 
+    # gets middle x value (because I'm lazy)
     def getXMid(self, screen):
         return int(screen.getmaxyx()[1] / 2)
 
+    # easy printing things
     def formatString(self, text, width):
         return ''.join(textwrap.wrap(text, width)[-5:])
 
+    # needs to be called, otherwise bad news bears
     def endScreen(self):
         self.screen.clear()
         curses.endwin()
 
+    # basis for all draw stuff/-
     def drawBlankScreen(self):
         self.screen.clear()
         mid = self.getXMid(self.header)
@@ -60,7 +65,8 @@ class enigma:
         self.header.addstr(3, mid - 9, "THE ENIGMA MACHINE")
         self.screen.refresh()
 
-    def drawSettings(self, selected):
+    # when you press exit,6
+    def drawEscape(self, selected):
         self.screen.refresh()
         mid = self.getXMid(self.output)
         self.output.box()
@@ -68,17 +74,25 @@ class enigma:
         self.output.refresh()
         self.keyboard.box()
         self.rotors.box()
+        self.header.refresh()
 
-        if selected % 2 == 0:
+        if selected % 3 == 0:
             self.keyboard.addstr(0, 46, "KEYBOARD")
             self.rotors.addstr(0, 8, "ROTOR SETTINGS:", curses.A_REVERSE)
-        else:
+            self.header.addstr(5, mid - 7, "EXIT")
+        elif selected % 3 == 1:
             self.keyboard.addstr(0, 46, "KEYBOARD", curses.A_REVERSE)
             self.rotors.addstr(0, 8, "ROTOR SETTINGS:")
+            self.header.addstr(5, mid - 7, "EXIT")
+        else:
+            self.keyboard.addstr(0, 46, "KEYBOARD")
+            self.rotors.addstr(0, 8, "ROTOR SETTINGS:")
+            self.header.addstr(5, mid - 2, "EXIT", curses.A_REVERSE)
 
         self.keyboard.refresh()
         self.rotors.refresh()
 
+    # draws the middle section (the output if you will).
     def drawOutput(self):
         xMax = self.output.getmaxyx()[1]
 
@@ -88,6 +102,7 @@ class enigma:
         self.output.addstr(6, 0, self.formatString(self.ciphertext, xMax))
         self.output.refresh()
 
+    # draws the rotors (top section)
     def drawRotors(self, rotorArray):
         for y in range(3):
             x = 15 + y * 5 - 5
@@ -98,6 +113,7 @@ class enigma:
                 self.rotors.addstr(4 + 2 * z, x, rotorArray[1][y][z])
         self.rotors.refresh()
 
+    # draws the keyboard (bottom section)
     def drawKeyboard(self, highlightedKey=" "):
         keyAlphabet = "qwertyuiopasdfghjklzxcvbnm"
         xPosBases = [41, 45, 36]
@@ -119,22 +135,21 @@ class enigma:
             print("yMax: " + str(self.yMax) + " xMax: " + str(self.xMax))
             print("yPos: " + str(yPos) + " xPos: " + str(xPos))
 
-    def drawEdit():
-        if y % 2 == 0:
+    # draws section where you can edit sections (in progress)
+    def drawEdit(y, x, selected):
+        """if y % 2 == 0:
             yPos = 2
         else:
             yPos = 4
         xPos = (x % 3) * 5 + 10
-
-
-
+        """
 
     def drawReset(self):
         self.screen.clear()
         self.screen.refresh()
         self.drawBlankScreen()
         self.drawKeyboard()
-        self.drawRotors(self.encrypter.getFancyRotorArray())
+        self.drawRotors(self.encrypter.getRotorArray())
         self.drawOutput()
 
     def machineLoop(self):
@@ -154,7 +169,7 @@ class enigma:
                     self.plaintext += a
                     self.ciphertext += a
             self.drawKeyboard(self.ciphertext[-1])
-            self.drawRotors(self.encrypter.getFancyRotorArray())
+            self.drawRotors(self.encrypter.getRotorArray())
             self.drawOutput()
             self.screen.refresh()
 
@@ -162,7 +177,7 @@ class enigma:
         action = 0
         selected = 1
         while (True):
-            self.drawSettings(selected)
+            self.drawEscape(selected)
             action = self.screen.getch()
             if action == 27:
                 return -1
@@ -173,16 +188,16 @@ class enigma:
             elif action == ord("\n"):
                 return selected
 
-    def editLoop(self, array):
+    def editLoop(self):
         y = 0
         x = 0
         selected = False
         while (True):
-            self.drawEditSettings(y, x, selected)
+            self.drawSettings(y, x, selected)
             action = self.screen.getch()
             if selected:
-               if action == 27:
-                    selected = false
+                if action == 27:
+                    selected = False
                 elif action == curses.KEY_UP:
                     array[y][x] += 1
                 elif action == curses.KEY_DOWN:
@@ -191,7 +206,7 @@ class enigma:
                     return (y, x)
             else:
                 if action == 27:
-                    return -1;
+                    return -1
                 elif action == curses.KEY_UP:
                     y -= 1
                 elif action == curses.KEY_DOWN:
@@ -201,21 +216,21 @@ class enigma:
                 elif action == curses.KEY_RIGHT:
                     x += 1
                 elif action == ord("\n"):
-                    selected = True;
+                    selected = True
 
     def run(self):
         self.drawBlankScreen()
         self.drawKeyboard()
-        self.drawRotors(self.encrypter.getFancyRotorArray())
+        self.drawRotors()
         self.drawOutput()
 
         try:
+            editing = 1
             while True:
-                editing = 1
                 if editing == -1:
                     break
                 elif editing == 0:
-                    self.editLoop(self.encryptor.getSettings())
+                    self.editLoop(self.encrypter.getRotorSettings())
                 elif editing == 1:
                     self.machineLoop()
                 editing = self.settingsLoop()

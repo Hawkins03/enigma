@@ -1,18 +1,13 @@
-import curses
-import sys
-from enum import Enum
+#W;0B import sys
+# from enum import Enum
 import util
 
-'''
 
-changing settings:
-
-'''
 class Encoding():
-    def __init__(self): 
+    def __init__(self):
         self.generate_settings()
         self.initalize_settings()
-        self.concatEncryptions = "";
+        self.concatEncryptions = ""
 
     def generate_settings(self):
         '''
@@ -22,54 +17,53 @@ class Encoding():
         Line 4: plugboard pt 2
         '''
 
-        #reading settings and setting self.settings = to the first 4 lines of the settings file
-        f = open('settings.txt','r')
+        # reading first 4 lines of the settings file
+        f = open('settings.txt', 'r')
         self.settings = f.readlines()[:4]
         f.close()
-
-        formatted_settings = []
         breaks = []
-        #removing newlines, finding the spaces, and then changing the string into lists
+        # formatting settings
         for i in range(4):
             self.settings[i] = util.remove_newlines(self.settings[i])
-            breaks.append(util.find_breaks(self.settings[i],' '))
-            self.settings[i] = util.string_to_list(self.settings[i],breaks[i])
+            breaks.append(util.find_breaks(self.settings[i], ' '))
+            self.settings[i] = util.string_to_list(self.settings[i], breaks[i])
 
     def initalize_settings(self):
-        #initalizing rotors
+        # initalizing rotors
         self.rotor_settings = []
         for i in range(3):
             self.rotor_settings.append(self.settings[0][i-1])
 
-        #generating rotors
-        rotor_list = open('.rotors.txt','r').readlines()
+        # generating rotors
+        rotor_list = open('.rotors.txt', 'r').readlines()
         for i in range(len(rotor_list)):
             rotor_list[i] = util.remove_newlines(rotor_list[i])
 
         self.rotors = []
         for i in self.settings[1]:
-            self.rotors.append(rotor_list[i]) # reading in the selected rotors
-        self.rotors.append('ejmzalyxvbwfcrquontspikhgd') #reflector
+            self.rotors.append(rotor_list[i])  # reading in the selected rotors
+        self.rotors.append('ejmzalyxvbwfcrquontspikhgd')  # reflector
 
-        self.alpha='abcdefghijklmnopqrstuvwxyz'
+        self.alpha = 'abcdefghijklmnopqrstuvwxyz'
 
-        #plugboard pairs
-        self.pairs = [self.settings[2],self.settings[3]]
+        # plugboard pairs
+        self.pairs = [self.settings[2], self.settings[3]]
 
-        allRotorUpdates = [['r'],['f'],['w'],['k'],['a'],['a','n'],['a','n'],['a','n']]
-        
+        allRotorUpdates = [['r'], ['f'], ['w'], ['k'], ['a'], ['a', 'n'], ['a', 'n'], ['a', 'n']]
+
         self.rotor_updates = []
         for i in range(3):
             self.rotor_updates.append(allRotorUpdates[self.settings[1][i]])
-    
-    def getFancyRotorSettings(self):
-        toReturn = "rotors chosen:  #%d  #%d  #%d" % (self.settings[1][0], self.settings[1][1], self.settings[1][2])
-        toReturn += "\nrotor settings: #" + str(self.settings[0][0]).zfill(2) + " #" + str(self.settings[0][1]).zfill(2) + " #" + str(self.settings[0][2]).zfill(2)
+
+    def getRotorSettings(self):
+        s = self.settings[1]
+        toReturn = "rotors chosen:  #%d  #%d  #%d" % (s[0], s[1], s[2])
+        toReturn += "\nrotor settings: #" + str(self.settings[0][0]).zfill(2)
+        toReturn += " #" + str(self.settings[0][1]).zfill(2)
+        toReturn += " #" + str(self.settings[0][2]).zfill(2)
         return toReturn
 
-
-    def getFancyRotorArray(self):
-        rotorSettings = self.settings[0]
+    def getRotorArray(self):
         toReturn = [self.settings[1], [["a", "a", "a"], ["b", "b", "b"], ["c", "c", "c"]]]
         for y in range(3):
             for x in range(3):
@@ -78,14 +72,12 @@ class Encoding():
         return toReturn
 
     def rotor(self, rotor_number, plaintext):
-        for i in range(0,len(self.alpha)):
+        for i in range(0, len(self.alpha)):
             if plaintext == self.alpha[i]:
                 if rotor_number < 3:
-                    position = self.settings[0][rotor_number]
-                    return self.rotors[rotor_number][(i+self.settings[0][rotor_number])%26]
+                    return self.rotors[rotor_number][(i+self.settings[0][rotor_number]) % 26]
                 else:
                     return self.rotors[rotor_number][i]
-
 
     def updateRotors(self):
         self.settings[0][0] = (self.settings[0][0] + 1) % 26
@@ -104,7 +96,7 @@ class Encoding():
                 plaintext = self.settings[2][i]
         return plaintext
 
-    def encrypt(self, plaintext, output = True):
+    def encrypt(self, plaintext, output=True):
         outputStr = plaintext + " "
         ciphertext = self.plugboard(plaintext)
         outputStr += ciphertext + " "
@@ -121,9 +113,9 @@ class Encoding():
             print(outputStr)
         self.concatEncryptions += ciphertext + "\n"
         return ciphertext
-    
-    def close(self, save = True):
-        settingLines = open("settings.txt", "r").readlines();
+
+    def close(self, save=True):
+        settingLines = open("settings.txt", "r").readlines()
         settingLines[0] = ' '.join(map(str, self.settings[0])) + "\n"
         settingLines[1] = ' '.join(map(str, self.settings[1])) + "\n"
         settingLines[2] = ' '.join(map(str, self.settings[2])) + "\n"
@@ -136,9 +128,11 @@ class Encoding():
             f.write(self.concatEncryptions)
             f.close()
 
-#debug by pprint("rotor setting: " + str(self.settings[0][rotor_number]))
+# debug by pprint("rotor setting: " + str(self.settings[0][rotor_number]))
+
+
 encoder = Encoding()
-#for i in range(26):
-    #letter = chr(i + 97)
-    #encoder.encrypt(letter)
-#encoder.close()
+# for i in range(26):
+#     letter = chr(i + 97)
+#     encoder.encrypt(letter)
+# encoder.close()
