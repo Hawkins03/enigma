@@ -1,4 +1,4 @@
-'''
+/* '''
 A few util packages for encoding.py
 
 @author Hawkins Peterson
@@ -23,3 +23,4 @@ def string_to_list(string,breaks):
         except:
             formatted_string.append(string[breaks[i]:breaks[i+1]-1])
     return formatted_string
+*/

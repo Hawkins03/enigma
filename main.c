@@ -1,3 +1,4 @@
+/*
 import curses
 import sys
 import textwrap
@@ -159,4 +160,4 @@ try:
 except Exception as e:
     endScreen(screen)
     print(e)
-
+*/
