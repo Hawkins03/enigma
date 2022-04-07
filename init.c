@@ -1,29 +1,10 @@
-#include "encoding.h"
+#include "init.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <malloc.h>
 
-//%d %d %d\n    rotor positions
-//%d %d %d\n    rotor selections
-//%c %c %c %c %c %c %c %c %c %c\n mappings 1
-//%c %c %c %c %c %c %c %c %c %c\n mappings 2
-void print_settings(settings_struct_t *settings) {
-  printf("Positions:\n");
-  for (int i = 0; i < 3; i++) {
-    printf("rotor %u: %u\n", settings -> r_set[i], settings -> r_pos[i]);
-  }
-
-  printf("\n");
-  printf("letter pairs: ");
-  for (int i = 0; i < 9; i++) {
-    printf("%c - %c, ", settings -> plug_top[i], settings -> plug_bot[i + 1]);
-  }
-  printf("%c - %c\n", settings -> plug_top[9], settings -> plug_bot[9]);
-}
-
-
-settings_struct_t *open_settings() {
+settings_struct_t *get_settings() {
   FILE *in_ptr = NULL;
   in_ptr = fopen(".settings.txt", "r");
   if (in_ptr == NULL) {
@@ -35,7 +16,6 @@ settings_struct_t *open_settings() {
   if (settings == NULL) {
     return NULL;
   }
-
 
   int status = 0;
   for (int i = 0; i < 3; i++) {
@@ -69,41 +49,79 @@ settings_struct_t *open_settings() {
   return settings;
 }
 
-char **get_rotors() {
-  FILE *in_ptr = NULL;
-  in_ptr = fopen(".rotors.txt", "r");
-  if (in_ptr == NULL) {
-    printf("NOOOOO");
-    fflush(NULL);
+int set_settings(settings_struct_t output) {
+  FILE *out_ptr = NULL;
+  out_ptr = fopen(".settings.txt", "w");
+  if (out_ptr == NULL) {
+    printf("Error, no file found.");
     return NULL;
   }
 
-  char *temp;
-  char rotor_lst[8][27];
+  if (settings == NULL) {
+    return NULL;
+  }
+
   int status = 0;
-  printf("adsf\n");
-  fflush(NULL);
-  for (int i = 0; i < 8; i++) {
-    printf("%d, ", i);
-    fflush(NULL);
-    status = fscanf(in_ptr, "%26s\n", temp);
+  for (int i = 0; i < 3; i++) {
+    status = fprintf(in_ptr, "%d ", &(settings -> r_pos[i]));
     if (status != 1) {
-      printf("%d, dangit", i);
-      fflush(NULL);
       return NULL;
     }
   }
 
-  return rotor_lst;
+  for (int i = 0; i < 3; i++) {
+    status = fscanf(in_ptr, "%d ", &(settings -> r_set[i]));
+    if(status != 1) {
+      return NULL;
+    }
+  }
+
+  for (int i = 0; i < 10; i++) {
+    status = fscanf(in_ptr, "%c ", &(settings -> plug_top[i]));
+    if(status != 1) {
+      return NULL;
+    }
+  }
+
+  for (int i = 0; i < 10; i++) {
+    status = fscanf(in_ptr, "%c ", &(settings -> plug_bot[i]));
+    if(status != 1) {
+      return NULL;
+    }
+  }
+
+  return settings;
 }
 
-int main() {
-  settings_struct_t *settings = open_settings();
-  print_settings(settings);
 
-  char **rotor_lst = get_rotors();
-  printf("%s", rotor_lst[0]);
-  return 0;
+
+char **get_rotors() {
+  FILE *in_ptr = NULL;
+  in_ptr = fopen(".rotors.txt", "r");
+  if (in_ptr == NULL) {
+    fflush(NULL);
+    return NULL;
+  }
+
+  char temp[27];
+  char **rotor_lst = malloc(sizeof(char *));
+  for (int i = 0; i < 8; i++) {
+    rotor_lst[i] = malloc(27 * sizeof(char));
+  }
+
+  int status = 0;
+  fflush(NULL);
+  for (int i = 0; i < 8; i++) {
+    fflush(NULL);
+    status = fscanf(in_ptr, "%26[a-z]\n", temp);
+    if (status != 1) {
+      fflush(NULL);
+      return NULL;
+    }
+    rotor_lst[i] = temp;
+  }
+
+  return rotor_lst;
 }
 
 /*
