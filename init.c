@@ -1,8 +1,36 @@
 #include "init.h"
 
-#include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include <malloc.h>
+
+static char g_rotors[8][27] = {"ekmflgdqvzntowyhxuspaibrcj",
+                               "ajdksiruxblhwtmcqgznpyfvoe",
+                               "bdfhjlcprtxvznyeiwgakmusqo",
+                               "esovpzjayquirhxlnftgkdcmwb",
+                               "vzbrgityupsdnhlxawmjqofeck",
+                               "jpgvoumfyqbenhzrdkasxlitcw",
+                               "nzjhgrcxmyswboufaivlpekqdt",
+                               "fkqhtlxocbjspdzramewniuygv"};
+
+void print_settings(settings_struct_t *settings) {
+  if (settings == 0) {
+    return;
+  }
+  printf("Enigma settings:\n");
+
+  printf("Rotors:\n");
+  for (int i = 0; i < 3; i++) {
+    printf("%d: %s %d\n", i, settings->rotors[i], settings->r_set[i]);
+  }
+
+  printf("Plugboard:\n");
+  for (int i = 0; i < 10; i++) {
+    printf("%c-%c ", settings->plug_top[i], settings->plug_bot[i]);
+  }
+  printf("\n");
+
+}
 
 settings_struct_t *get_settings() {
   FILE *in_ptr = NULL;
@@ -19,109 +47,96 @@ settings_struct_t *get_settings() {
 
   int status = 0;
   for (int i = 0; i < 3; i++) {
-    status = fscanf(in_ptr, "%d ", &(settings -> r_pos[i]));
+    status = fscanf(in_ptr, "%d ", &(settings->r_pos[i]));
     if (status != 1) {
       return NULL;
     }
   }
 
+  for (int i = 0; i < 3; i ++) {
+    strncpy(settings->rotors[i], g_rotors[settings->r_pos[i] % 8], 27);
+  }
+
   for (int i = 0; i < 3; i++) {
-    status = fscanf(in_ptr, "%d ", &(settings -> r_set[i]));
+    status = fscanf(in_ptr, "%d ", &(settings->r_set[i]));
     if(status != 1) {
       return NULL;
     }
   }
 
   for (int i = 0; i < 10; i++) {
-    status = fscanf(in_ptr, "%c ", &(settings -> plug_top[i]));
+    status = fscanf(in_ptr, "%c ", &(settings->plug_top[i]));
     if(status != 1) {
       return NULL;
     }
   }
 
   for (int i = 0; i < 10; i++) {
-    status = fscanf(in_ptr, "%c ", &(settings -> plug_bot[i]));
+    status = fscanf(in_ptr, "%c ", &(settings->plug_bot[i]));
     if(status != 1) {
       return NULL;
     }
   }
+
+  printf("close: %d\n", fclose(in_ptr));
+  in_ptr = NULL;
 
   return settings;
 }
 
-int set_settings(settings_struct_t output) {
+int set_settings(settings_struct_t *settings) {
   FILE *out_ptr = NULL;
   out_ptr = fopen(".settings.txt", "w");
   if (out_ptr == NULL) {
     printf("Error, no file found.");
-    return NULL;
+    return STARTUP_ERR;
   }
 
   if (settings == NULL) {
-    return NULL;
+    return STARTUP_ERR;
   }
 
   int status = 0;
   for (int i = 0; i < 3; i++) {
-    status = fprintf(in_ptr, "%d ", &(settings -> r_pos[i]));
+    status = fprintf(out_ptr, "%ls ", &(settings->r_pos[i]));
     if (status != 1) {
-      return NULL;
+      return READ_ERR;
     }
   }
 
   for (int i = 0; i < 3; i++) {
-    status = fscanf(in_ptr, "%d ", &(settings -> r_set[i]));
+    status = fscanf(out_ptr, "%ls ", &(settings->r_set[i]));
     if(status != 1) {
-      return NULL;
+      return READ_ERR;
     }
   }
 
   for (int i = 0; i < 10; i++) {
-    status = fscanf(in_ptr, "%c ", &(settings -> plug_top[i]));
+    status = fscanf(out_ptr, "%c ", &(settings->plug_top[i]));
     if(status != 1) {
-      return NULL;
+      return READ_ERR;
     }
   }
 
   for (int i = 0; i < 10; i++) {
-    status = fscanf(in_ptr, "%c ", &(settings -> plug_bot[i]));
+    status = fscanf(out_ptr, "%c ", &(settings->plug_bot[i]));
     if(status != 1) {
-      return NULL;
+      return READ_ERR;
     }
   }
 
-  return settings;
+  printf("close: %d\n", fclose(out_ptr));
+  out_ptr = NULL;
+
+  return 0;
 }
 
-
-
-char **get_rotors() {
-  FILE *in_ptr = NULL;
-  in_ptr = fopen(".rotors.txt", "r");
-  if (in_ptr == NULL) {
-    fflush(NULL);
-    return NULL;
-  }
-
-  char temp[27];
-  char **rotor_lst = malloc(sizeof(char *));
-  for (int i = 0; i < 8; i++) {
-    rotor_lst[i] = malloc(27 * sizeof(char));
-  }
-
-  int status = 0;
-  fflush(NULL);
-  for (int i = 0; i < 8; i++) {
-    fflush(NULL);
-    status = fscanf(in_ptr, "%26[a-z]\n", temp);
-    if (status != 1) {
-      fflush(NULL);
-      return NULL;
-    }
-    rotor_lst[i] = temp;
-  }
-
-  return rotor_lst;
+int main() {
+  settings_struct_t *settings = get_settings();
+  print_settings(settings);
+  printf("%d\n", set_settings(settings));
+  settings = get_settings();
+  print_settings(settings);
 }
 
 /*

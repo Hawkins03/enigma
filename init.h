@@ -9,6 +9,7 @@
 #define NULL_INPUT      (-3)
 
 typedef struct settings_struct {
+  char rotors[3][27];
   unsigned int r_pos[3];
   unsigned int r_set[3];
   unsigned char plug_top[10];
