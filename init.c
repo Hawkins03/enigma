@@ -4,14 +4,15 @@
 #include <string.h>
 #include <malloc.h>
 
-static char g_rotors[8][27] = {"ekmflgdqvzntowyhxuspaibrcj",
+const char G_ROTORS[9][27] = {"ekmflgdqvzntowyhxuspaibrcj",
                                "ajdksiruxblhwtmcqgznpyfvoe",
                                "bdfhjlcprtxvznyeiwgakmusqo",
                                "esovpzjayquirhxlnftgkdcmwb",
                                "vzbrgityupsdnhlxawmjqofeck",
                                "jpgvoumfyqbenhzrdkasxlitcw",
                                "nzjhgrcxmyswboufaivlpekqdt",
-                               "fkqhtlxocbjspdzramewniuygv"};
+                               "fkqhtlxocbjspdzramewniuygv",
+                               "ejmzalyxvbwfcrquontspikhgd"};
 
 void print_settings(settings_struct_t *settings) {
   if (settings == 0) {
@@ -54,8 +55,9 @@ settings_struct_t *get_settings() {
   }
 
   for (int i = 0; i < 3; i ++) {
-    strncpy(settings->rotors[i], g_rotors[settings->r_pos[i] % 8], 27);
+    strncpy(settings->rotors[i], G_ROTORS[settings->r_pos[i] % 8], 27);
   }
+  strncpy(settings->rotors[3], G_ROTORS[8], 27);
 
   for (int i = 0; i < 3; i++) {
     status = fscanf(in_ptr, "%d ", &(settings->r_set[i]));
