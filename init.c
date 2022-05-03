@@ -14,92 +14,87 @@ const char G_ROTORS[9][27] = {"ekmflgdqvzntowyhxuspaibrcj",
                                "fkqhtlxocbjspdzramewniuygv",
                                "ejmzalyxvbwfcrquontspikhgd"};
 
-void print_settings(settings_struct_t *settings) {
-  if (settings == 0) {
+void print_settings(session_t *session) {
+  if (session == 0) {
     return;
   }
   printf("Enigma settings:\n");
 
   printf("Rotors:\n");
   for (int i = 0; i < 3; i++) {
-    printf("%d: %s %d\n", i, settings->rotors[i], settings->r_set[i]);
+    printf("%d: %s %d\n", i, session->rotors[i], session->r_set[i]);
   }
 
   printf("Plugboard:\n");
   for (int i = 0; i < 10; i++) {
-    printf("%c-%c ", settings->plug_top[i], settings->plug_bot[i]);
+    printf("%c-%c ", session->plug_top[i], session->plug_bot[i]);
   }
   printf("\n");
 
 }
 
-settings_struct_t *get_settings() {
+session_t *get_settings() {
   FILE *in_ptr = NULL;
-  in_ptr = fopen(".settings.txt", "r");
+  in_ptr = fopen(".session.txt", "r");
   if (in_ptr == NULL) {
     printf("Error, no file found.");
     return NULL;
   }
 
-  settings_struct_t *settings = malloc(sizeof(settings_struct_t));
-  if (settings == NULL) {
+  session_t *session = malloc(sizeof(session_t));
+  if (!session)
     return NULL;
-  }
 
   int status = 0;
   for (int i = 0; i < 3; i++) {
-    status = fscanf(in_ptr, "%d ", &(settings->r_pos[i]));
-    if (status != 1) {
+    status = fscanf(in_ptr, "%d ", &(session->r_pos[i]));
+    if (status != 1)
       return NULL;
-    }
   }
 
   for (int i = 0; i < 3; i ++) {
-    strncpy(settings->rotors[i], G_ROTORS[settings->r_pos[i] % 8], 27);
+    strncpy(session->rotors[i], G_ROTORS[session->r_pos[i] % 8], 27);
   }
-  strncpy(settings->rotors[3], G_ROTORS[8], 27);
+  strncpy(session->rotors[3], G_ROTORS[8], 27);
 
   for (int i = 0; i < 3; i++) {
-    status = fscanf(in_ptr, "%d ", &(settings->r_set[i]));
-    if(status != 1) {
+    status = fscanf(in_ptr, "%d ", &(session->r_set[i]));
+    if(status != 1)
       return NULL;
-    }
   }
 
   for (int i = 0; i < 10; i++) {
-    status = fscanf(in_ptr, "%c ", &(settings->plug_top[i]));
-    if(status != 1) {
+    status = fscanf(in_ptr, "%c ", &(session->plug_top[i]));
+    if(status != 1)
       return NULL;
-    }
   }
 
   for (int i = 0; i < 10; i++) {
-    status = fscanf(in_ptr, "%c ", &(settings->plug_bot[i]));
-    if(status != 1) {
+    status = fscanf(in_ptr, "%c ", &(session->plug_bot[i]));
+    if(status != 1)
       return NULL;
-    }
   }
 
   in_ptr = NULL;
 
-  return settings;
+  return session;
 }
 
-int set_settings(settings_struct_t *settings) {
+int set_settings(session_t *session) {
   FILE *out_ptr = NULL;
-  out_ptr = fopen(".settings.txt", "w");
+  out_ptr = fopen(".session.txt", "w");
   if (out_ptr == NULL) {
     printf("Error, no file found.");
     return STARTUP_ERR;
   }
 
-  if (settings == NULL) {
+  if (session == NULL) {
     return STARTUP_ERR;
   }
 
   int status = 0;
   for (int i = 0; i < 3; i++) {
-    status = fprintf(out_ptr, "%d ", settings->r_pos[i]);
+    status = fprintf(out_ptr, "%d ", session->r_pos[i]);
     if (status <= 0) {
       return WRITE_ERR;
     }
@@ -107,7 +102,7 @@ int set_settings(settings_struct_t *settings) {
   fprintf(out_ptr, "\n");
 
   for (int i = 0; i < 3; i++) {
-    status = fprintf(out_ptr, "%d ", settings->r_set[i]);
+    status = fprintf(out_ptr, "%d ", session->r_set[i]);
     if(status <= 0) {
       return WRITE_ERR;
     }
@@ -115,7 +110,7 @@ int set_settings(settings_struct_t *settings) {
   fprintf(out_ptr, "\n");
 
   for (int i = 0; i < 10; i++) {
-    status = fprintf(out_ptr, "%c ", settings->plug_top[i]);
+    status = fprintf(out_ptr, "%c ", session->plug_top[i]);
     if(status <= 0) {
       return WRITE_ERR;
     }
@@ -123,7 +118,7 @@ int set_settings(settings_struct_t *settings) {
   fprintf(out_ptr, "\n");
 
   for (int i = 0; i < 10; i++) {
-    status = fprintf(out_ptr, "%c ", settings->plug_bot[i]);
+    status = fprintf(out_ptr, "%c ", session->plug_bot[i]);
     if(status <= 0) {
       return WRITE_ERR;
     }

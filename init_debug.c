@@ -4,13 +4,12 @@
 #include <stdlib.h>
 
 int main() {
-  settings_struct_t *settings = malloc(sizeof(settings_struct_t));
-  settings = get_settings();
-  print_settings(settings);
-  printf("%d\n", set_settings(settings));
-  settings = get_settings();
-  print_settings(settings);
+  session_t *session = get_settings();
+  print_settings(session);
+  printf("%d\n", set_settings(session));
+  session = get_settings();
+  print_settings(session);
 
-  free(settings);
-  settings = NULL;
+  free(session);
+  session = NULL;
 }
