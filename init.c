@@ -127,6 +127,6 @@ int set_settings(session_t *session) {
   printf("close: %d\n", fclose(out_ptr));
   out_ptr = NULL;
 
-  return 0;
+  return 1;
 }
 
