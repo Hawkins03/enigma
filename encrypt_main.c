@@ -13,36 +13,25 @@ int main(int argc, char **argv) {
 
   printf("encrypting 'c' was %s\n", (rotor(sesh, 1, &in) == 1)? "good": "bad");
 
-  printf("letter is now %c\n\n", in);
+  printf("letter is now %c\n", in);
 
-  fflush(NULL);
+  int status = set_settings(sesh);
+  printf("%s", (status == 1) ? "session saved successfully" : "save failed");
+  printf(" (%d)\n", status);
+
   char *str = "stuff n things";
   char *m_str = malloc(strlen(str) + 1);
 
-  printf("past malloc\n");
-  fflush(NULL);
-
-  if (!m_str) {
-    printf("MALLOC ERROR\n");
-    fflush(NULL);
+  if (!m_str)
     return 0;
-  }
-  printf("malloc good\n");
-  fflush(NULL);
 
   strncpy(m_str, str, strlen(str) + 1);
 
   printf("str = %s\n", m_str);
-  fflush(NULL);
 
-  int status = encrypt_string(str);
+  status = encrypt_string(&m_str);
 
-  printf("new string is %s (status = %d)\n", str, status);
-  fflush(NULL);
-
-  status = set_settings(sesh);
-  printf("%s", (status == 1) ? "session saved successfully" : "save failed");
-  printf (" (%d)\n", status);
+  printf("new string is %s (status = %d)\n", m_str, status);
 
   free(m_str);
   m_str = NULL;

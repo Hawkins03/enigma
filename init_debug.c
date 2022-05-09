@@ -6,10 +6,11 @@
 int main() {
   session_t *session = get_settings();
   print_settings(session);
-  printf("%d\n", set_settings(session));
+  session->r_set[0]++;
+  printf("save was %s\n\n", set_settings(session)? "good": "bad");
   session = get_settings();
   print_settings(session);
 
-  free(session);
-  session = NULL;
+  close_session(&session, NULL);
 }
+

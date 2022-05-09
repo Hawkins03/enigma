@@ -15,19 +15,14 @@
  */
 
 char rotor(const session_t *sesh, int rotor_num, char *letter_ptr) {
-  printf("0.\n");
   // nothing points to null right?
   if ((!sesh) || (!(*letter_ptr)))
-    return BAD_INPUT;
-
-  printf("1.\n");
+    return 0;
 
   // the letter is within bounds right?
   char letter = *letter_ptr;
   if ((letter <= 64) || ((letter > 90) && (letter < 97)) || (letter > 122))
-    return OUT_OF_BOUNDS;
-
-  printf("2.\n");
+    return 0;
 
   // finding where the letter is in the alphabet.
   int rotor_pos = -1;
@@ -36,13 +31,8 @@ char rotor(const session_t *sesh, int rotor_num, char *letter_ptr) {
   else
     rotor_pos = letter - 97;
 
-  if ((rotor_pos > 26) || (rotor_pos < 0))
-    printf("rotor_pos is %d", rotor_pos);
-
-  printf("3. %d\n", sesh->rotors[rotor_num % 4][rotor_pos % 26]);
-
   // replacing the letter with an encrypted letter. (DOUBLE CHECK)
-  return sesh->rotors[rotor_num % 4][rotor_pos % 26];
+  return sesh->rotors[rotor_num % 4][(rotor_pos + sesh->r_set[rotor_num]) % 26];
 } /* rotor() */
 
 /*
@@ -54,30 +44,35 @@ char rotor(const session_t *sesh, int rotor_num, char *letter_ptr) {
  * again, then the function calls itself to rotate the next rotor.
  */
 
-int click(session_t **session_ptr, int rotor_num) {
+int click(session_t **sesh_ptr, int rotor_num) {
+  printf("click! (%d)", (*sesh_ptr)->r_set[rotor_num]);
   const int turnover[8][2] = {{23, -1}, {22, -1}, {17, -1}, {20, -1},
                                {25, -1}, {12, 18}, {0, 16}, {16, 20}};
 
   //checking for null values
-  if ((!session_ptr) || (!(*session_ptr)))
+  if ((!sesh_ptr) || (!(*sesh_ptr)))
     return BAD_INPUT;
 
   // kills the recursive loop (DO NOT TOUCH)
   if ((rotor_num >= 4) || (rotor_num < 0))
     return 0;
 
-  // var setup
-  session_t *sesh = *session_ptr;
+  int rotor_selection = (*sesh_ptr)->r_pos[rotor_num];
+  printf("%d = %d", rotor_selection, turnover[rotor_selection][0]);
+
 
   // rotating the rotor.
-  sesh->r_pos[rotor_num] = (sesh->r_pos[rotor_num] + 1) % 26;
+  (*sesh_ptr)->r_set[rotor_num] = ((*sesh_ptr)->r_set[rotor_num] + 1) % 26;
 
   // checking to see if I need to rotate the next rotor
-  if ((sesh->r_pos[rotor_num] == turnover[rotor_num][0]) ||
-      (sesh->r_pos[rotor_num] == turnover[rotor_num][1]))
-    click(session_ptr, rotor_num++);
+  if (((*sesh_ptr)->r_set[rotor_num] == turnover[rotor_selection][0]) ||
+      ((*sesh_ptr)->r_set[rotor_num] == turnover[rotor_selection][1])) {
+    printf("activating");
+    click(sesh_ptr, ++rotor_num);
+    printf("\n");
+    print_settings(*sesh_ptr);
+  }
 
-  *session_ptr = sesh;
   return SUCCESS;
 } /* click() */
 
@@ -88,34 +83,39 @@ int click(session_t **session_ptr, int rotor_num) {
  * Note, string must be a pointer, not array (so that it can be rewritten).
  */
 
-int encrypt_string(char *plaintext) {
-  if ((!plaintext) || (strlen(plaintext) <= 0))
+int encrypt_string(char **plaintext_ptr) {
+  if ((!plaintext_ptr) || (!*plaintext_ptr) || (strlen(*plaintext_ptr) <= 0))
     return BAD_INPUT;
 
-  session_t *sesh = get_settings();
-  printf("plaintext = %s\n", plaintext);
+  char *plaintext = *plaintext_ptr;
 
-  fflush(NULL);
+  session_t *sesh = get_settings();
+
   int i = 0;
   while (plaintext[i] != 0) {
-    printf("%d<%c>\n", i, plaintext[i]);
-
+    printf("%d<%c> ", i, plaintext[i]);
     for (int j = 0; j < 4; j++) {
-      plaintext[i] = rotor(sesh, j, &plaintext[i]);
-      printf("after\n");
-      printf("%c\n", plaintext[i]);
+      char letter = rotor(sesh, j, &plaintext[i]);
+      if (letter != 0)
+        plaintext[i] = letter;
+      printf("%d%c ", j, plaintext[i]);
     }
 
     for (int j = 2; j >= 0; j--) {
-      rotor(sesh, j, &plaintext[i]);
-      printf("%c\n", plaintext[i]);
+      char letter = rotor(sesh, j, &plaintext[i]);
+      if (letter != 0)
+        plaintext[i] = letter;
+      printf("%d%c ", j, plaintext[i]);
     }
 
-    click(&sesh, 0);
     i++;
+    printf("(%ld)", strlen(plaintext));
+    printf("click was : %d", click(&sesh, 0));
+    printf("\n");
   }
-  set_settings(sesh);
-  // kill sesh
 
+  print_settings(sesh);
+  printf("set was %s\n", set_settings(sesh)? "good": "bad");
+  close_session(&sesh, NULL);
   return i;
 } /* encrypt_string() */

@@ -1,6 +1,8 @@
 #ifndef INIT_H
 #define INIT_H
 
+#include <stdio.h>
+
 #define NUM_ROTORS      (3)
 #define NUM_LETTERS     (26)
 
@@ -11,8 +13,8 @@
 
 typedef struct session_struct {
   char rotors[4][27];
-  int r_pos[3];
-  int r_set[3];
+  int r_pos[3]; // selected rotor numbers (0-7)
+  int r_set[3]; // rotor settings (0-25)
   unsigned char plug_top[10];
   unsigned char plug_bot[10];
 } session_t;
@@ -22,5 +24,6 @@ typedef struct session_struct {
 void print_settings(session_t *);
 session_t *get_settings();
 int set_settings(session_t *);
+int close_session(session_t **, FILE **);
 
 #endif /* INIT_H */
