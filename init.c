@@ -137,8 +137,6 @@ int set_settings(session_t *session) {
     return STARTUP_ERR;
   }
 
-  print_settings(session);
-
   if (session == NULL) {
     return STARTUP_ERR;
   }

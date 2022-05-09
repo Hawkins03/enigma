@@ -25,5 +25,7 @@ void print_settings(session_t *);
 session_t *get_settings();
 int set_settings(session_t *);
 int close_session(session_t **, FILE **);
+int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
+                  unsigned char plug_top[10], unsigned char plug_bot[10]);
 
 #endif /* INIT_H */

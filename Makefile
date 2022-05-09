@@ -1,12 +1,9 @@
 CC = gcc
-CFLAGS = -Wall -Werror -I.
+CFLAGS = -Wall -Werror
 DEPS = init.h encrypt.h
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-init_debug: init.o init_debug.o
-	$(CC) -o init_debug init.o init_debug.o $(CFLAGS)
-
-encrypt_debug: encrypt_main.o encrypt.o init.o
-	$(CC) -o encrypt encrypt_main.o encrypt.o init.o $(CFLAGS)
+debug: debug.o encrypt.o init.o
+	$(CC) -o debug debug.o encrypt.o init.o $(CFLAGS)

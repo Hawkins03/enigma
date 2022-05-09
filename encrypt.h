@@ -10,6 +10,7 @@
 #define SUCCESS         (1)
 
 char rotor(const session_t *sesh, int rotor_num, char *letter_ptr);
+char plugboard(const session_t *sesh, char *letter_ptr);
 int output_string(char *ciphertext, int length);
 int click(session_t **session, int rotor_num);
 int encrypt_string(char **plaintext);

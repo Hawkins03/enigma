@@ -6,18 +6,25 @@
 #include <string.h>
 
 int main(int argc, char **argv) {
+  printf("Starting init debug:\n");
+  printf("Getting settings:\n");
   session_t *sesh = get_settings();
   print_settings(sesh);
 
-  char in = 'c';
-
-  printf("encrypting 'c' was %s\n", (rotor(sesh, 1, &in) == 1)? "good": "bad");
-
-  printf("letter is now %c\n", in);
-
+  printf("\nsaving settings:\n");
   int status = set_settings(sesh);
   printf("%s", (status == 1) ? "session saved successfully" : "save failed");
   printf(" (%d)\n", status);
+  close_session(&sesh, NULL);
+
+  printf("\nre-fetching settings:\n");
+  sesh = get_settings();
+  print_settings(sesh);
+
+  close_session(&sesh, NULL);
+  printf("\ninit debug done.\n\n");
+
+  printf("encrypt debug:\n");
 
   char *str = "stuff n things";
   char *m_str = malloc(strlen(str) + 1);

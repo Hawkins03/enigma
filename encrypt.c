@@ -16,13 +16,11 @@
 
 char rotor(const session_t *sesh, int rotor_num, char *letter_ptr) {
   // nothing points to null right?
-  if ((!sesh) || (!(*letter_ptr)))
+  if ((!sesh) || (!letter_ptr))
     return 0;
 
   // the letter is within bounds right?
   char letter = *letter_ptr;
-  if ((letter <= 64) || ((letter > 90) && (letter < 97)) || (letter > 122))
-    return 0;
 
   // finding where the letter is in the alphabet.
   int rotor_pos = -1;
@@ -36,6 +34,30 @@ char rotor(const session_t *sesh, int rotor_num, char *letter_ptr) {
 } /* rotor() */
 
 /*
+ * takes a character and if it matches a character on the plugboard, the
+ * function returns the complimentary character back. (Not for personal use.)
+ */
+
+char plugboard(const session_t *sesh, char *letter_ptr) {
+  if ((!sesh ) || !(letter_ptr))
+    return 0;
+
+  char letter = *letter_ptr;
+
+  //checking for capital letters.
+  if (letter < 97)
+    letter += 32;
+
+  for (int i = 0; i < 10; i++) {
+    if (letter == sesh->plug_top[i])
+      return sesh->plug_bot[i];
+    if (letter == sesh->plug_bot[i])
+      return sesh->plug_top[i];
+  }
+  return letter;
+} /* plugboard() */
+
+/*
  * takes in a pointer to a session, and a rotor number. This isn't to be called
  * by the user, because it's always called once per letter by encrypt_string.
  *
@@ -45,7 +67,6 @@ char rotor(const session_t *sesh, int rotor_num, char *letter_ptr) {
  */
 
 int click(session_t **sesh_ptr, int rotor_num) {
-  printf("click! (%d)", (*sesh_ptr)->r_set[rotor_num]);
   const int turnover[8][2] = {{23, -1}, {22, -1}, {17, -1}, {20, -1},
                                {25, -1}, {12, 18}, {0, 16}, {16, 20}};
 
@@ -58,7 +79,6 @@ int click(session_t **sesh_ptr, int rotor_num) {
     return 0;
 
   int rotor_selection = (*sesh_ptr)->r_pos[rotor_num];
-  printf("%d = %d", rotor_selection, turnover[rotor_selection][0]);
 
 
   // rotating the rotor.
@@ -66,12 +86,8 @@ int click(session_t **sesh_ptr, int rotor_num) {
 
   // checking to see if I need to rotate the next rotor
   if (((*sesh_ptr)->r_set[rotor_num] == turnover[rotor_selection][0]) ||
-      ((*sesh_ptr)->r_set[rotor_num] == turnover[rotor_selection][1])) {
-    printf("activating");
+      ((*sesh_ptr)->r_set[rotor_num] == turnover[rotor_selection][1]))
     click(sesh_ptr, ++rotor_num);
-    printf("\n");
-    print_settings(*sesh_ptr);
-  }
 
   return SUCCESS;
 } /* click() */
@@ -81,6 +97,12 @@ int click(session_t **sesh_ptr, int rotor_num) {
  * lowercase (to be fixed)). Returns an error if plaintext points to NULL.
  *
  * Note, string must be a pointer, not array (so that it can be rewritten).
+ *
+ * also, if you want a detailed description of what's going in behind the
+ * scenes, uncoment the print statments. That shows you the index, plaintext
+ * for of the letter, followed by the plugboard return, followed by the 7 rotor
+ * outputs (0, 1, 2, 3, 2, 1, 0) (3 = reflector), followed by the last
+ * plugboard output.
  */
 
 int encrypt_string(char **plaintext_ptr) {
@@ -93,29 +115,44 @@ int encrypt_string(char **plaintext_ptr) {
 
   int i = 0;
   while (plaintext[i] != 0) {
-    printf("%d<%c> ", i, plaintext[i]);
+    //printf("%d<%c> ", i, plaintext[i]);
+
+    if ((plaintext[i] <= 64) || ((plaintext[i] > 90) && (plaintext[i] < 97)) ||
+        (plaintext[i] > 122)) {
+      //printf("\n");
+      i++;
+      continue;
+    }
+
+    char letter = plaintext[i];
+ 
+    //printf("%c ", plugboard[i]);
+    letter = plugboard(sesh, &plaintext[i]);
+    plaintext[i] = letter;
+
     for (int j = 0; j < 4; j++) {
-      char letter = rotor(sesh, j, &plaintext[i]);
+      letter = rotor(sesh, j, &plaintext[i]);
       if (letter != 0)
         plaintext[i] = letter;
-      printf("%d%c ", j, plaintext[i]);
+      //printf("%c", plaintext[i]);
     }
 
     for (int j = 2; j >= 0; j--) {
-      char letter = rotor(sesh, j, &plaintext[i]);
+      letter = rotor(sesh, j, &plaintext[i]);
       if (letter != 0)
         plaintext[i] = letter;
-      printf("%d%c ", j, plaintext[i]);
+      //printf("%c", plaintext[i]);
     }
 
+    letter = plugboard(sesh, &plaintext[i]);
+    plaintext[i] = letter;
+    //printf(" %c\n", plaintext[i]);
+    click(&sesh, 0);
     i++;
-    printf("(%ld)", strlen(plaintext));
-    printf("click was : %d", click(&sesh, 0));
-    printf("\n");
   }
 
-  print_settings(sesh);
-  printf("set was %s\n", set_settings(sesh)? "good": "bad");
+  set_settings(sesh);
   close_session(&sesh, NULL);
   return i;
 } /* encrypt_string() */
+
