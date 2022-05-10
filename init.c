@@ -207,3 +207,32 @@ int close_session(session_t **sesh_ptr, FILE **file_ptr) {
   *sesh_ptr = NULL;
   return 1;
 } /* close_session() */
+
+int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
+                  unsigned char plug_top[10], unsigned char plug_bot[10]) {
+  if ((!sesh_ptr) || (!*sesh_ptr))
+    return 0;
+
+  if (r_pos) {
+    for (int i = 0; i < 3; i++)
+      (*sesh_ptr)->r_pos[i] = r_pos[i];
+    for (int i = 0; i < 3; i ++)
+      strncpy((*sesh_ptr)->rotors[i], G_ROTORS[(*sesh_ptr)->r_pos[i] % 8], 27);
+  }
+
+  if (r_set)
+    for (int i = 0; i < 3; i++)
+      (*sesh_ptr)->r_set[i] = r_set[i];
+
+  if (plug_top)
+    for (int i = 0; i < 10; i++)
+      (*sesh_ptr)->plug_top[i] = plug_top[i];
+
+  if (plug_bot)
+    for (int i = 0; i < 10; i++)
+      (*sesh_ptr)->plug_bot[i] = plug_bot[i];
+
+
+
+  return 1;
+}
