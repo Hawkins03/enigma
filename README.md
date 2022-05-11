@@ -1,11 +1,8 @@
 # enigma
 A enigma machine I built using python origionally, and am now rebuilding in C.
 
-NOTE. This is still in progress, and currently doesn't work. 
+To work, run "make" and then use the ./encrypt followed by whatever you want to encrypt.
 
-Todo:
-- change rotor into a struct (char * ) followed by char [2]. (2nd is turnovers)
-
-=======
-To see a working version I built three years ago (that is a total mess (hense the rewriting)) go to master
-
+init contains any functions required to edit, fetch and store session data,
+encrypt stores anything required to encrypt the data
+term stores anything required to interact with the terminal.

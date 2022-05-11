@@ -6,6 +6,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+ * finds the length a concatination will take. (padding included between
+ * each string, and start reffers to the index of str_lib to start at.)
+ * (start starts at 1 not 0).
+ *
+ * if any of the pointers (save for padding) point to null, the function will
+ * return NULL_INPUT (-1). Otherwise returns the length required to malloc to
+ * join all the strings in str_lib corectly.
+ */
+
 long int find_str_len(char **str_lib, int len, char *padding, int start) {
   if ((!str_lib) || (!*str_lib))
     return NULL_INPUT;
@@ -19,7 +29,14 @@ long int find_str_len(char **str_lib, int len, char *padding, int start) {
   }
 
   return sum;
-}
+} /* find_str_len() */
+
+/*
+ * joins a string array (starting at index start (start starts at 1))
+ *
+ * if any pointers point to null, it returns null. Otherwise it returns
+ * the joined string.
+ */
 
 char *join_str(char **str_lib, int len, char *padding, int start) {
   if (!(str_lib) || (!*str_lib))
@@ -38,7 +55,7 @@ char *join_str(char **str_lib, int len, char *padding, int start) {
   }
 
   return concat;
-}
+} /* join_str() */
 
 int main (int argc, char **argv) {
 
