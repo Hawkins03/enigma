@@ -11,4 +11,6 @@ encrypt: term.o encrypt.o init.o
 debug: debug.o encrypt.o init.o
 	$(CC) -o debug debug.o encrypt.o init.o $(CFLAGS)
 
-
+.phony: clean
+clean:
+	rm *.o encrypt debug
