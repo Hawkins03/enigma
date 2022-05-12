@@ -28,8 +28,11 @@ int main(int argc, char **argv) {
   draw_keyboard(active_w, 'a');
 
   while (TRUE) {
-    
-
+    int action = getch();
+    if ((action >= 97) && (action <= 122)) {
+      draw_keyboard(active_w, action - 97);
+      
+    }
   }
 
 

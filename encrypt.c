@@ -116,9 +116,14 @@ int encrypt_string(char **plaintext_ptr) {
   int i = 0;
   while (plaintext[i] != 0) {
     //printf("%d<%c> ", i, plaintext[i]);
-    int status = encrypt_letter(sesh, &plaintext[i]);
-    if (status == BAD_INPUT)
+    char buff = encrypt_letter(sesh, plaintext[i]);
+
+    if (buff == -1)
       break;
+    if (buff != 0)
+      plaintext[i] = buff;
+
+    //printf(" %c\n", plaintext[i]);
     i++;
   }
   set_settings(sesh);
@@ -126,22 +131,16 @@ int encrypt_string(char **plaintext_ptr) {
   return i;
 } /* encrypt_string() */
 
-int encrypt_letter(session_t *sesh, char *letter_ptr) {
-  if ((!letter_ptr) || (!sesh))
-    return BAD_INPUT;
-
-  char letter = *letter_ptr;
-
-  //printf("%d<%c> ", i, plaintext[i]);
-  if (letter == 0)
-    return BAD_INPUT;
+char encrypt_letter(session_t *sesh, char letter) {
+  if ((!sesh) || (letter == 0))
+    return -1;
 
   if ((letter <= 64) || ((letter > 90) && (letter < 97)) ||
       (letter > 122)) {
     //printf("\n");
     return 0;
   }
-  //printf("%c ", plugboard[i]);
+  //printf("%c ", letter);
   char buff = 0;
   letter = plugboard(sesh, &letter);
 
@@ -149,19 +148,19 @@ int encrypt_letter(session_t *sesh, char *letter_ptr) {
     buff = rotor(sesh, j, &letter);
     if (buff != 0)
       letter = buff;
-    //printf("%c", plaintext[i]);
+    //printf("%c", letter);
   }
 
   for (int j = 2; j >= 0; j--) {
     buff = rotor(sesh, j, &letter);
     if (buff != 0)
       letter = buff;
-    //printf("%c", plaintext[i]);
+    //printf("%c", letter);
   }
 
   letter = plugboard(sesh, &letter);
-  //printf(" %c\n", plaintext[i]);
+
   click(&sesh, 0);
-  return 1;
+  return letter;
 } /* encrypt_char() */
 
