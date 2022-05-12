@@ -6,3 +6,7 @@ To work, run "make" and then use the ./encrypt followed by whatever you want to 
 init contains any functions required to edit, fetch and store session data,
 encrypt stores anything required to encrypt the data
 term stores anything required to interact with the terminal.
+tui contains everything needed to run the text based ui (using ncurses)
+
+Ncurses instilation:
+"sudo apt install libncurses5-dev libncursesw5-dev"

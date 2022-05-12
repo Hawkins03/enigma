@@ -116,43 +116,52 @@ int encrypt_string(char **plaintext_ptr) {
   int i = 0;
   while (plaintext[i] != 0) {
     //printf("%d<%c> ", i, plaintext[i]);
-
-    if ((plaintext[i] <= 64) || ((plaintext[i] > 90) && (plaintext[i] < 97)) ||
-        (plaintext[i] > 122)) {
-      //printf("\n");
-      i++;
-      continue;
-    }
-
-    char letter = plaintext[i];
- 
-    //printf("%c ", plugboard[i]);
-    letter = plugboard(sesh, &plaintext[i]);
-    plaintext[i] = letter;
-
-    for (int j = 0; j < 4; j++) {
-      letter = rotor(sesh, j, &plaintext[i]);
-      if (letter != 0)
-        plaintext[i] = letter;
-      //printf("%c", plaintext[i]);
-    }
-
-    for (int j = 2; j >= 0; j--) {
-      letter = rotor(sesh, j, &plaintext[i]);
-      if (letter != 0)
-        plaintext[i] = letter;
-      //printf("%c", plaintext[i]);
-    }
-
-    letter = plugboard(sesh, &plaintext[i]);
-    plaintext[i] = letter;
-    //printf(" %c\n", plaintext[i]);
-    click(&sesh, 0);
+    int status = encrypt_letter(sesh, &plaintext[i]);
+    if (status == BAD_INPUT)
+      break;
     i++;
   }
-
   set_settings(sesh);
   close_session(&sesh, NULL);
   return i;
 } /* encrypt_string() */
+
+int encrypt_letter(session_t *sesh, char *letter_ptr) {
+  if ((!letter_ptr) || (!sesh))
+    return BAD_INPUT;
+
+  char letter = *letter_ptr;
+
+  //printf("%d<%c> ", i, plaintext[i]);
+  if (letter == 0)
+    return BAD_INPUT;
+
+  if ((letter <= 64) || ((letter > 90) && (letter < 97)) ||
+      (letter > 122)) {
+    //printf("\n");
+    return 0;
+  }
+  //printf("%c ", plugboard[i]);
+  char buff = 0;
+  letter = plugboard(sesh, &letter);
+
+  for (int j = 0; j < 4; j++) {
+    buff = rotor(sesh, j, &letter);
+    if (buff != 0)
+      letter = buff;
+    //printf("%c", plaintext[i]);
+  }
+
+  for (int j = 2; j >= 0; j--) {
+    buff = rotor(sesh, j, &letter);
+    if (buff != 0)
+      letter = buff;
+    //printf("%c", plaintext[i]);
+  }
+
+  letter = plugboard(sesh, &letter);
+  //printf(" %c\n", plaintext[i]);
+  click(&sesh, 0);
+  return 1;
+} /* encrypt_char() */
 

@@ -85,6 +85,6 @@ int main (int argc, char **argv) {
     return -1;
   }
 
-  printf("Output: %s", concat);
+  printf("Output: %s\n", concat);
   return 1;
 }
