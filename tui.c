@@ -1,4 +1,6 @@
 #include "tui.h"
+#include "init.h"
+#include "encrypt.h"
 
 #include <curses.h>
 #include <stdio.h>
@@ -17,27 +19,47 @@ int main(int argc, char **argv) {
   getmaxyx(stdscr, YMAX, XMAX);
 
   WINDOW *header_w = subwin(stdscr, 9, XMAX,  0, 0);
-  WINDOW *setting_w = subwin(stdscr, YMAX - 8, 29, 8, 0);
+  //WINDOW *setting_w = subwin(stdscr, YMAX - 8, 29, 8, 0);
   WINDOW *active_w = subwin(stdscr, YMAX - 8, XMAX, 8, 0);
-  WINDOW *inactive_w = subwin(stdscr, YMAX - 8, XMAX - 28, 8, 28);
+  //WINDOW *inactive_w = subwin(stdscr, YMAX - 8, XMAX - 28, 8, 28);
 
-  WINDOW *keyboard_w = subwin(stdscr, 16, XMAX, YMAX - 16, 0);
-  WINDOW *output_w = subwin(stdscr, 25, XMAX, 8, 0);
+  //WINDOW *keyboard_w = subwin(stdscr, 16, XMAX, YMAX - 16, 0);
+  //WINDOW *output_w = subwin(stdscr, 25, XMAX, 8, 0);
 
   draw_blank_scr(header_w);
   draw_keyboard(active_w, 'a');
 
+  session_t *sesh = get_settings();
+  char plain[129] = { 0 };
+  char cipher[129] = { 0 };
+  int i = 0;
+
   while (TRUE) {
     int action = getch();
+    if (i == 129) {
+      break;
+      // will put in a function to save plain and cipher and reset them later.
+    }
     if ((action >= 97) && (action <= 122)) {
       draw_keyboard(active_w, action - 97);
-      
+      cipher[i] = encrypt_letter(sesh, (char) action);
+      plain[i] = action;
     }
+    else if (action == 27) {
+      break;
+      wclear(stdscr);
+      //show menu
+    }
+    wrefresh(active_w);
+    refresh();
+    i++;
   }
 
 
   getch();
   endwin();
+
+  printf("plaintext: %s\nciphertext: %s\n", plain, cipher);
   return 0;
 }
 

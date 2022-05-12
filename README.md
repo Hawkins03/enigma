@@ -10,3 +10,7 @@ tui contains everything needed to run the text based ui (using ncurses)
 
 Ncurses instilation:
 "sudo apt install libncurses5-dev libncursesw5-dev"
+
+
+todo:
+  make program to store buff into a text file when it overwrites.
