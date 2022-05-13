@@ -13,6 +13,6 @@ char plugboard(const session_t *sesh, char letter);
 int output_string(char *ciphertext, int length);
 int click(session_t **session, int rotor_num);
 int encrypt_string(char **plaintext);
-char encrypt_letter(session_t *sesh, char letter);
+char encrypt_letter(session_t **sesh_ptr, char letter);
 
 #endif /* ENCRYPT_H */

@@ -1,4 +1,4 @@
 4 3 2 
-12 12 8 
+2 13 8 
 a a a a a a a a a a 
 z y x w v u t s r q 

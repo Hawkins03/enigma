@@ -99,7 +99,7 @@ int encrypt_string(char **plaintext_ptr) {
   int i = 0;
   while (plaintext[i] != 0) {
     //printf("%d<%c> ", i, plaintext[i]);
-    char buff = encrypt_letter(sesh, plaintext[i]);
+    char buff = encrypt_letter(&sesh, plaintext[i]);
 
     if (buff == -1)
       break;
@@ -114,8 +114,8 @@ int encrypt_string(char **plaintext_ptr) {
   return i;
 } /* encrypt_string() */
 
-char encrypt_letter(session_t *sesh, char letter) {
-  if ((!sesh) || (letter == 0))
+char encrypt_letter(session_t **sesh_ptr, char letter) {
+  if ((!sesh_ptr) || (!*sesh_ptr) || (letter == 0))
     return -1;
 
   if ((letter <= 64) || ((letter > 90) && (letter < 97)) ||
@@ -125,6 +125,7 @@ char encrypt_letter(session_t *sesh, char letter) {
   }
 
   //printf("%c ", letter);
+  session_t *sesh = *sesh_ptr;
   char buff = 0;
   letter = plugboard(sesh, letter);
 
