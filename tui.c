@@ -2,7 +2,7 @@
 #include "init.h"
 #include "encrypt.h"
 
-#include <curses.h>
+#include <ncurses.h>
 #include <stdio.h>
 #include <strings.h>
 #include <stdbool.h>
@@ -28,55 +28,62 @@ int main(int argc, char **argv) {
    * output: where I output the results
    */
 
+
   WINDOW *header_w = subwin(stdscr, 9, XMAX,  0, 0);
   //WINDOW *sidebar_w = subwin(stdscr, YMAX - 8, 29, 8, 0);
-  WINDOW *active_w = subwin(stdscr, YMAX - 8, XMAX, 8, 0);
+  //WINDOW *active_w = subwin(stdscr, YMAX - 10, XMAX - 2, 8, 1);
   //WINDOW *pause_w = subwin(stdscr, YMAX - 8, XMAX - 28, 8, 28);
 
-  WINDOW *keyboard_w = subwin(active_w, 20, XMAX, YMAX - 20, 0);
-  //WINDOW *output_w = subwin(active_w, 25, XMAX, 0, 0);
+  WINDOW *keyboard_w = newwin(20, XMAX - 2, YMAX - 21, 1);
+  WINDOW *output_w = newwin(3, XMAX - 2, 31, 1);
 
   draw_blank_scr(header_w);
   draw_keyboard(keyboard_w, 0);
-  wrefresh(active_w);
   refresh();
 
   session_t *sesh = get_settings();
   char plain[129] = { 0 };
   char cipher[129] = { 0 };
 
+
   int i = 0;
   while (TRUE) {
+    wclear(output_w);
     int action = getch();
-    if (i == 129) {
+    if (i == 128) {
       break;
       // will put in a function to save plain and cipher and reset them later.
     }
     if ((action >= 97) && (action <= 122)) {
-      draw_keyboard(active_w, action);
+      draw_keyboard(keyboard_w, action);
       cipher[i] = encrypt_letter(&sesh, (char) action);
       plain[i] = action;
+      draw_output(output_w, plain, cipher);
     }
     else if (action == 27) {
       break;
       //show menu
     }
-    wrefresh(active_w);
+    wrefresh(keyboard_w);
+    wrefresh(output_w);
     refresh();
     i++;
   }
+
+  delwin(header_w);
+  delwin(keyboard_w);
+  delwin(output_w);
 
   set_settings(sesh);
   close_session(&sesh, NULL);
   endwin();
 
-  printf("plaintext: %s\nciphertext: %s\n", plain, cipher);
+  printf("plaintext:  %s\nciphertext: %s\n", plain, cipher);
   return 0;
 }
 
 int draw_blank_scr(WINDOW *header_w) {
   box(stdscr, '|', '-');
-  hline('-', XMAX - 2);
   mvwaddstr(header_w, 3, XMAX / 2 - 9, "THE ENIGMA MACHINE");
   refresh();
   return 0;
@@ -96,15 +103,15 @@ int draw_keyboard(WINDOW *keyboard_w, char key) {
   int x_pos, y_pos = 0;
   for (int i = 0; i < 26; i++) {
     if (i <= 9) {
-      y_pos = a_ymax - 15;
+      y_pos = a_ymax - 17;
       x_pos = a_xmax / 2 + i * 9 - 41;
     }
     else if (i <= 18) {
-      y_pos = a_ymax - 8;
+      y_pos = a_ymax - 10;
       x_pos = a_xmax / 2 + (i - 9) * 9 - 46;
     }
     else {
-      y_pos = a_ymax - 2;
+      y_pos = a_ymax - 3;
       x_pos = a_xmax / 2 + (i - 18) * 9 - 41;
     }
 
@@ -113,19 +120,31 @@ int draw_keyboard(WINDOW *keyboard_w, char key) {
       mvwaddch(keyboard_w, y_pos, x_pos, key_order[i]);
       wattroff(keyboard_w, A_STANDOUT);
     }
-
-    else
+    else {
       mvwaddch(keyboard_w, y_pos, x_pos, key_order[i]);
+    }
   }
   wrefresh(keyboard_w);
   return highlighted_key;
 }
 
+int draw_output(WINDOW *output_w, char *plain, char *cipher) {
+  if ((!plain) || (!cipher))
+    return ERROR;
+
+  wprintw(output_w, "Plaintext: %s\n", plain);
+  wprintw(output_w, "\nCiphertext: %s\n", cipher);
+
+  wrefresh(output_w);
+  return 0;
+}
+
+/*
 int menu(WINDOW *sidebar_w) {
   if (!sidebar_w)
     return -1;
 
-  char **messages = {"1. go back:", "2. edit settings:", "3. exit:"};
+  char *messages[3] = {"1. go back:", "2. edit settings:", "3. exit:"};
 
   int selected = 1;
   while (TRUE) {
@@ -134,7 +153,7 @@ int menu(WINDOW *sidebar_w) {
       if (selected % 3 == i) {
         wattron(sidebar_w, A_STANDOUT);
         mvwaddstr(sidebar_w, i + 8, 1, messages[i]);
-        mvwaddch(sidebar_w, i + 8, 0, A_RARROW);
+        mvwaddch(sidebar_w, i + 8, 0, ACS_RARROW);
         wattroff(sidebar_w, A_STANDOUT);
         continue;
       }
@@ -153,10 +172,6 @@ int menu(WINDOW *sidebar_w) {
   }
 
   selected = selected % 3;
-  if (selected == 0)
-    return 0;
-  if (selected == 3)
-    return -1;
 
-  // draw edit buttons
-}
+  return selected;
+}*/

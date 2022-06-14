@@ -144,6 +144,7 @@ char encrypt_letter(session_t **sesh_ptr, char letter) {
   }
 
   letter = plugboard(sesh, letter);
+  //printf("%c\n", letter);
 
   click(&sesh, 0);
   return letter;

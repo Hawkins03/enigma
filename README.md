@@ -8,9 +8,11 @@ encrypt stores anything required to encrypt the data
 term stores anything required to interact with the terminal.
 tui contains everything needed to run the text based ui (using ncurses)
 
-Ncurses instilation:
-"sudo apt install libncurses5-dev libncursesw5-dev"
+This project relies on ncurses for c. To install it, paste the following command into your terminal
+"sudo apt install libncurses5-dev libncursesw5-dev -y"
 
 
 todo:
   make program to store buff into a text file when it overwrites.
+
+
