@@ -27,5 +27,7 @@ int set_settings(session_t *);
 int close_session(session_t **, FILE **);
 int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
                   unsigned char plug_top[10], unsigned char plug_bot[10]);
+int push_msg(int *msg_num; char message[129]);
+char *read_message(int length);
 
 #endif /* INIT_H */

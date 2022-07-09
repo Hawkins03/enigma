@@ -232,7 +232,75 @@ int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
     for (int i = 0; i < 10; i++)
       (*sesh_ptr)->plug_bot[i] = plug_bot[i];
 
+  return 1;
+}
 
+/**
+ * carefull with this, it modifies files, please just use something from
+ * encrypt.c if you want to encrypt something.
+ *
+ * takes in a pointer to the message number and a message to read into data.
+ * then reads in the message followed by a newline, and increments the message
+ * number.
+ *
+ * returns WRITE_ERR if there's an error writing to the file.
+ * Otherwise returns 1.
+ */
+
+int append_message(int *msg_num, char *message) {
+  if ((!msg_num) || (!message))
+    break;
+
+  FILE *out_file = NULL;
+  out_file = fopen(".messages.txt", "a");
+
+  if (out_file == NULL)
+    return WRITE_ERR;
+
+  int status = 0;
+
+  status = fprintf(out_file, message);
+  if (status == 0) {
+    fclose(out_file);
+    out_file = NULL;
+    return WRITE_ERR;
+  }
+
+  status = fprintf(out_file, "\n")
+  if (status == 0) {
+    fclose(out_file);
+    out_file = NULL:
+    return WRITE_ERR;
+  }
+
+  fclose(out_file);
+  out_file = NULL;
+  (*msg_num)++;
 
   return 1;
+}
+
+char *read_message(int total_msg_num) {
+  FILE *in_file = NULL;
+  in_file = fopen(".messages.txt", "r");
+
+  char *message = malloc(129 * total_msg_num * sizeof(char) + 1);
+  char buff[130] = [ 0 ];
+  if (message == NULL)
+  for (int i = 0; i < total_msg_num; i++) {
+    int status = fscanf(in_file, "%129[a-zA-Z]", buff);
+    if (status != 1) {
+      free(message);
+      message = NULL;
+
+      fclear(in_file);
+      in_file = NULL;
+      return NULL;
+    }
+
+    strncpy(message[129 * i], buff);
+    message[129 * (i + 1) + 1] = "\0";
+  }
+
+  return message;
 }

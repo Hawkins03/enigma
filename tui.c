@@ -30,10 +30,6 @@ int main(int argc, char **argv) {
 
 
   WINDOW *header_w = subwin(stdscr, 9, XMAX,  0, 0);
-  //WINDOW *sidebar_w = subwin(stdscr, YMAX - 8, 29, 8, 0);
-  //WINDOW *active_w = subwin(stdscr, YMAX - 10, XMAX - 2, 8, 1);
-  //WINDOW *pause_w = subwin(stdscr, YMAX - 8, XMAX - 28, 8, 28);
-
   WINDOW *keyboard_w = newwin(20, XMAX - 2, YMAX - 21, 1);
   WINDOW *output_w = newwin(3, XMAX - 2, 31, 1);
 
@@ -139,7 +135,6 @@ int draw_output(WINDOW *output_w, char *plain, char *cipher) {
   return 0;
 }
 
-/*
 int menu(WINDOW *sidebar_w) {
   if (!sidebar_w)
     return -1;
@@ -174,4 +169,4 @@ int menu(WINDOW *sidebar_w) {
   selected = selected % 3;
 
   return selected;
-}*/
+}
