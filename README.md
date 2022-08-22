@@ -15,4 +15,6 @@ This project relies on ncurses for c. To install it, paste the following command
 todo:
   make program to store buff into a text file when it overwrites.
 
-
+git auto log in (when pushing on WSL):
+  git config --global credential.helper "/mnt/c/Program\ Files/Git/mingw64/libexec/git-core/git-credential-wincred.exe"
+(you're welcome future me / other person reading this :D)

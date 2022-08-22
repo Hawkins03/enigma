@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 // all 8 rotors that you can select plus the reflector.
 const char G_ROTORS[9][27] = {"ekmflgdqvzntowyhxuspaibrcj",
@@ -244,12 +244,13 @@ int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
  * number.
  *
  * returns WRITE_ERR if there's an error writing to the file.
+ * returns NULL_INPUT if an input is null
  * Otherwise returns 1.
  */
 
 int append_message(int *msg_num, char *message) {
   if ((!msg_num) || (!message))
-    break;
+    return NULL_INPUT;
 
   FILE *out_file = NULL;
   out_file = fopen(".messages.txt", "a");
@@ -259,17 +260,10 @@ int append_message(int *msg_num, char *message) {
 
   int status = 0;
 
-  status = fprintf(out_file, message);
+  status = fprintf(out_file, "%128s", message);
   if (status == 0) {
     fclose(out_file);
     out_file = NULL;
-    return WRITE_ERR;
-  }
-
-  status = fprintf(out_file, "\n")
-  if (status == 0) {
-    fclose(out_file);
-    out_file = NULL:
     return WRITE_ERR;
   }
 
@@ -284,23 +278,42 @@ char *read_message(int total_msg_num) {
   FILE *in_file = NULL;
   in_file = fopen(".messages.txt", "r");
 
-  char *message = malloc(129 * total_msg_num * sizeof(char) + 1);
-  char buff[130] = [ 0 ];
-  if (message == NULL)
+  char *message = malloc(129 * total_msg_num); // problem code
+  if (!message) {
+    printf("Malloc Failed\n");
+    return NULL;
+  }
+
   for (int i = 0; i < total_msg_num; i++) {
-    int status = fscanf(in_file, "%129[a-zA-Z]", buff);
+    char buff[129] = {0};
+    int status = fscanf(in_file, "%128[a-zA-Z]", buff);
     if (status != 1) {
+      printf("File Read Failed (syntax wonky).\n");
       free(message);
       message = NULL;
 
-      fclear(in_file);
+      fclose(in_file);
       in_file = NULL;
       return NULL;
     }
 
-    strncpy(message[129 * i], buff);
-    message[129 * (i + 1) + 1] = "\0";
+    strncpy(message, buff, 129);
   }
 
   return message;
+}
+
+
+/*
+ * empties the .messages.txt file.
+ */
+int clear_messages() {
+  FILE *in_file = NULL;
+  in_file = fopen(".messages.txt", "w");
+  if (in_file) {
+    fclose(in_file);
+    return 1;
+  }
+
+  return WRITE_ERR;
 }
