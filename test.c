@@ -18,15 +18,15 @@ int main(int argc, char *argv[]) {
     printf("test start:\n");
 
   int msg_num = 0;
-  char *recv;
   for (int i = 0; i < 3; i++) {
     int status = append_message(&msg_num, message);
     printf("%d %s\n", msg_num, (status == 1) ? "Write Worked!" : "Write Failed");
 
     char *recv = read_message(msg_num);
-    recv[128 * (i - 1)] = 'a';
+
     if (recv)
-      printf("%s\n", recv);
+      printf("Read Worked (%ld): %s\n",strlen(recv), recv);
+
     else {
       printf("Read Failed!\n");
       free(recv);

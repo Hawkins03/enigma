@@ -239,7 +239,7 @@ int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
  * carefull with this, it modifies files, please just use something from
  * encrypt.c if you want to encrypt something.
  *
- * takes in a pointer to the message number and a message to read into data.
+ * * takes in a pointer to the message number and a message to read into data.
  * then reads in the message followed by a newline, and increments the message
  * number.
  *
@@ -248,17 +248,21 @@ int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
  * Otherwise returns 1.
  */
 
-int append_message(int *msg_num, char *message) {
-  if ((!msg_num) || (!message))
+int append_message(int *msg_num, char *message, char *file_name) {
+  if ((!msg_num) || (!message) || (!file_name))
     return NULL_INPUT;
 
   FILE *out_file = NULL;
-  out_file = fopen(".messages.txt", "a");
+  out_file = fopen(file_name, "a");
 
   if (out_file == NULL)
     return WRITE_ERR;
 
   int status = 0;
+
+  // I think that my code is reading \0 from the last message and stopping
+  if (msg_num > 0)
+    fseek(out_file, -1, SEEK_CUR);
 
   status = fprintf(out_file, "%128s", message);
   if (status == 0) {
@@ -274,13 +278,24 @@ int append_message(int *msg_num, char *message) {
   return 1;
 }
 
-char *read_message(int total_msg_num) {
-  FILE *in_file = NULL;
-  in_file = fopen(".messages.txt", "r");
+/**
+ * reads out all the messages stored in a file given the number of messages.
+ * (just reuse the message number from append_message())
+ *
+ * NOTE, THIS OUTPUTS A MALLOC'D STRING! IT MUST BE FREED.
+ *
+ * ERROR, currently only reading first message, no matter the messge number.
+ *
+ */
 
-  char *message = malloc(129 * total_msg_num); // problem code
+char *read_message(int total_msg_num, char *file_name) {
+  if (!file_name)
+    return NULL;
+  FILE *in_file = NULL;
+  in_file = fopen(file_name, "r");
+
+  char *message = malloc(128 * total_msg_num + 1); // problem code
   if (!message) {
-    printf("Malloc Failed\n");
     return NULL;
   }
 
@@ -288,7 +303,6 @@ char *read_message(int total_msg_num) {
     char buff[129] = {0};
     int status = fscanf(in_file, "%128[a-zA-Z]", buff);
     if (status != 1) {
-      printf("File Read Failed (syntax wonky).\n");
       free(message);
       message = NULL;
 
@@ -297,8 +311,11 @@ char *read_message(int total_msg_num) {
       return NULL;
     }
 
-    strncpy(message, buff, 129);
+    strncpy(message + 128 * i, buff, 128);
   }
+  if ((message[128] == 0) && (total_msg_num != 1 || 0))
+    message[128] = '-';
+  message[128 * total_msg_num] = '\0';
 
   return message;
 }
@@ -307,9 +324,11 @@ char *read_message(int total_msg_num) {
 /*
  * empties the .messages.txt file.
  */
-int clear_messages() {
+int clear_messages(char *file_name) {
+  if (!file_name)
+    return NULL_INPUT;
   FILE *in_file = NULL;
-  in_file = fopen(".messages.txt", "w");
+  in_file = fopen(file_name, "w");
   if (in_file) {
     fclose(in_file);
     return 1;

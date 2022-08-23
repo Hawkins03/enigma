@@ -4,8 +4,9 @@
 
 #include <ncurses.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 static int YMAX, XMAX = 0;
 
@@ -43,12 +44,20 @@ int main(int argc, char **argv) {
 
 
   int i = 0;
+  int plain_messages = 0;
+  int cipher_messages = 0;
   while (TRUE) {
     wclear(output_w);
     int action = getch();
     if (i == 128) {
-      break;
-      // will put in a function to save plain and cipher and reset them later.
+      int status = append_message(&plain_messages, plain, ".plaintext.txt");
+      if (status != 1)
+        break;
+      status = append_message(&cipher_messages, cipher, ".ciphertext.txt");
+      if (status != 1)
+        break;
+      memset(plain, 0, strlen(plain));
+      memset(cipher, 0, strlen(cipher));
     }
     if ((action >= 97) && (action <= 122)) {
       draw_keyboard(keyboard_w, action);
@@ -70,11 +79,23 @@ int main(int argc, char **argv) {
   delwin(keyboard_w);
   delwin(output_w);
 
+  char *plain_out = read_message(plain_messages, ".plaintext.txt");
+  char *cipher_out = read_message(cipher_messages, ".ciphertext.txt");
+  if ((plain_out) && (cipher_out))
+    printf("Plaintext: %s\nCiphertext: %s", plain_out, cipher_out);
+
   set_settings(sesh);
+
+  free(plain_out);
+  plain_out = 0;
+  free(cipher_out);
+  cipher_out = 0;
+
+  clear_messages(".plaintext.txt");
+  clear_messages(".ciphertext.txt");
   close_session(&sesh, NULL);
   endwin();
 
-  printf("plaintext:  %s\nciphertext: %s\n", plain, cipher);
   return 0;
 }
 
