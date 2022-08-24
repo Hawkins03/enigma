@@ -4,28 +4,29 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-  clear_messages();
+  clear_messages(".message.txt");
   char *message = malloc(129);
 
   if (!message)
     return -1;
 
-  for (int i = 0; i < 129; i++)
+  for (int i = 0; i < 128; i++)
     message[i] = 'a';
   message[128] = '\0';
 
-  if (WRITE_ERR == -3)
-    printf("test start:\n");
+  printf("Test Start:\n");
 
   int msg_num = 0;
   for (int i = 0; i < 3; i++) {
-    int status = append_message(&msg_num, message);
-    printf("%d %s\n", msg_num, (status == 1) ? "Write Worked!" : "Write Failed");
+    // writing to file.
+    int status = append_message(&msg_num, message, ".message.txt");
+    printf("%d %s\n", msg_num,
+           (status == 1) ? "Write Worked!" : "Write Failed");
 
-    char *recv = read_message(msg_num);
+    char *recv = read_message(msg_num, ".message.txt");
 
     if (recv)
-      printf("Read Worked (%ld): %s\n",strlen(recv), recv);
+      printf("Read Worked (%ld): %s\n", strlen(recv), recv);
 
     else {
       printf("Read Failed!\n");

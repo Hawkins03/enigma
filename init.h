@@ -9,7 +9,7 @@
 #define STARTUP_ERR     (-1)
 #define READ_ERR        (-2)
 #define WRITE_ERR       (-3)
-#define NULL_INPUT      (-4)
+#define NULL_INPUT      (-5)
 
 typedef struct session_struct {
   char rotors[4][27];
@@ -30,6 +30,7 @@ int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
 
 int append_message(int *msg_num, char message[129], char *file_name);
 char *read_message(int length, char *file_name);
+int print_messages(int length, char *file_name);
 int clear_messages(char *file_name);
 
 #endif /* INIT_H */

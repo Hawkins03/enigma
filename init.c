@@ -243,6 +243,8 @@ int edit_settings(session_t **sesh_ptr, int r_pos[3], int r_set[3],
  * then reads in the message followed by a newline, and increments the message
  * number.
  *
+ * NOTE, this is prone to forgetting to remove the previous '\0' when writing.
+ *
  * returns WRITE_ERR if there's an error writing to the file.
  * returns NULL_INPUT if an input is null
  * Otherwise returns 1.
@@ -264,7 +266,7 @@ int append_message(int *msg_num, char *message, char *file_name) {
   if (msg_num > 0)
     fseek(out_file, -1, SEEK_CUR);
 
-  status = fprintf(out_file, "%128s", message);
+  status = fprintf(out_file, "%s", message);
   if (status == 0) {
     fclose(out_file);
     out_file = NULL;
@@ -284,8 +286,11 @@ int append_message(int *msg_num, char *message, char *file_name) {
  *
  * NOTE, THIS OUTPUTS A MALLOC'D STRING! IT MUST BE FREED.
  *
- * ERROR, currently only reading first message, no matter the messge number.
+ * ANOTHER NOTE,
  *
+ * ERROR, currently only reading first message, no matter the messge number.
+ *  Fixed, but if this happens check to make sure that it's not overwriting,
+ *  and that it's not forgetting to remove the stupid '\0' in allocate_message()
  */
 
 char *read_message(int total_msg_num, char *file_name) {
@@ -294,7 +299,7 @@ char *read_message(int total_msg_num, char *file_name) {
   FILE *in_file = NULL;
   in_file = fopen(file_name, "r");
 
-  char *message = malloc(128 * total_msg_num + 1); // problem code
+  char *message = malloc(128 * total_msg_num + 1);
   if (!message) {
     return NULL;
   }
@@ -313,11 +318,39 @@ char *read_message(int total_msg_num, char *file_name) {
 
     strncpy(message + 128 * i, buff, 128);
   }
-  if ((message[128] == 0) && (total_msg_num != 1 || 0))
+  if ((message[128] == 0) && (total_msg_num > 1))
     message[128] = '-';
   message[128 * total_msg_num] = '\0';
 
   return message;
+}
+
+/* Print messages is used when you call read_message, and cause a buffer
+ * overflow. This allows you to display that message, and not have your computer
+ * throw a tantrum.
+ */
+
+int print_messages(int total_msg_num, char *file_name) {
+  if (!file_name)
+    return NULL_INPUT;
+  FILE *in_file = fopen(file_name, "r");
+
+  if (!in_file) {
+    return READ_ERR;
+  }
+
+  for (int i = 0; i < total_msg_num; i++) {
+    char buff[129] = {0};
+    int status = fscanf(in_file, "%128[a-zA-Z]", buff);
+    if (status != 1) {
+      fclose(in_file);
+      in_file = NULL;
+      return READ_ERR;
+    }
+
+    printf("%s\n", buff);
+  }
+  return 1;
 }
 
 
