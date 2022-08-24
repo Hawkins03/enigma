@@ -51,13 +51,6 @@ int main(int argc, char **argv) {
   WINDOW *output_w = newwin(3, XMAX - 2, 31, 1);
   WINDOW *menu_w = newwin(YMAX - 10, XMAX - 10, 5, 5);
 
-  //-------------------STARTUP-------------------------
-  clear_messages(".plaintext.txt");
-  clear_messages(".ciphertext.txt");
-  draw_blank_scr(header_w);
-  draw_keyboard(keyboard_w, 0);
-  refresh();
-
   //-------------------VARIABLES-----------------------
   session_t *sesh = get_settings();
   char plain[129] = { 0 };
@@ -65,6 +58,15 @@ int main(int argc, char **argv) {
 
 
   int i = 0;
+
+  //-------------------STARTUP-------------------------
+  clear_messages(".plaintext.txt");
+  clear_messages(".ciphertext.txt");
+  draw_blank_scr(header_w);
+  draw_keyboard(keyboard_w, 0);
+  draw_output(output_w, plain, cipher);
+  refresh();
+
 
   /* two different variables because they're not supposed to be messed with by
      the user */
@@ -100,17 +102,35 @@ int main(int argc, char **argv) {
       plain[i] = action;
       draw_output(output_w, plain, cipher);
     }
-    else if ((action >= 32) && (action <= 126)) {
-      draw_keyboard(keyboard_w, 0);
-      plain[i] = action;
-      cipher[i] = action;
-      draw_output(output_w, plain, cipher);
-    }
     else if (action == 27) {
-      menu(menu_w);
+      int status = menu(menu_w);
+      if (status == 0) {
+        clear();
+        draw_blank_scr(header_w);
+        wrefresh(header_w);
+        draw_keyboard(keyboard_w, 0);
+        wrefresh(keyboard_w);
+        draw_output(output_w, plain, cipher);
+        wrefresh(output_w);
+        refresh();
+        continue;
+      }
+      else if ((status == -1) || (status == 2))
+        break;
+      else if (status == 3)
+        break; // to be replaced with a settings menu later
       break; //only way to escape unless clearing the buffers fails.
       //show menu
     }
+    else {
+      if ((action >= 32) && (action <= 126)) {
+        plain[i] = action;
+        cipher[i] = action;
+      }
+      draw_keyboard(keyboard_w, 0);
+      draw_output(output_w, plain, cipher);
+    }
+
 
     //making the display work
     wrefresh(keyboard_w);
@@ -237,39 +257,40 @@ int menu(WINDOW *menu_w) {
     return NULL_INPUT;
 
   wclear(menu_w);
-  box(menu, '|', '-');
+  wrefresh(menu_w);
+  box(menu_w, '|', '-');
 
-  getch();
-  return 1;
-  /*
   char *messages[3] = {"1. go back:", "2. edit settings:", "3. exit:"};
 
   int selected = 0;
+
   while (TRUE) {
-    box(menu_w, '-', '|');
     for (int i = 0; i < 3; i++) {
       if (selected % 3 == i) {
         wattron(menu_w, A_STANDOUT);
-        mvwaddstr(menu_w, i + 8, 1, messages[i]);
-        mvwaddch(menu_w, i + 8, 0, ACS_RARROW);
+        mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, messages[i]);
+        mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_RARROW);
         wattroff(menu_w, A_STANDOUT);
-        continue;
       }
-      mvwaddstr(menu_w, i + 8, 1, messages[i]);
+      else {
+        mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, messages[i]);
+        mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_DIAMOND);
+      }
     }
+    wrefresh(menu_w);
+    refresh();
     int action = getch();
 
-    if (action == KEY_UP)
+    if ((action == KEY_DOWN) || (action == '\t'))
       selected++;
-    else if (action == KEY_DOWN)
+    else if (action == KEY_UP)
       selected--;
-    else if (action == '\n')
+    else if ((action == '\n') || (action == ' '))
       break;
     else if (action == 27) // escape or alt
       return -1;
   }
 
   selected = selected % 3;
-
-  return selected;*/
+  return selected;
 }
