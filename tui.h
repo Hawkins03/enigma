@@ -2,8 +2,9 @@
 
 #include <curses.h>
 
-#define MENU_CURSOR  (ACS_RARROW)
-#define ERROR        (-1)
+#define MENU_CURSOR   (ACS_RARROW)
+#define ERROR         (-1)
+#define NULL_INPUT    (-2)
 
 int draw_blank_scr(WINDOW *header_w);
 int draw_keyboard(WINDOW *keyboard_w, char key);

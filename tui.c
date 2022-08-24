@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
   WINDOW *header_w = subwin(stdscr, 9, XMAX,  0, 0);
   WINDOW *keyboard_w = newwin(20, XMAX - 2, YMAX - 21, 1);
   WINDOW *output_w = newwin(3, XMAX - 2, 31, 1);
+  WINDOW *menu_w = newwin(YMAX - 10, XMAX - 10, 5, 5);
 
   //-------------------STARTUP-------------------------
   clear_messages(".plaintext.txt");
@@ -106,6 +107,7 @@ int main(int argc, char **argv) {
       draw_output(output_w, plain, cipher);
     }
     else if (action == 27) {
+      menu(menu_w);
       break; //only way to escape unless clearing the buffers fails.
       //show menu
     }
@@ -230,24 +232,30 @@ int draw_output(WINDOW *output_w, char *plain, char *cipher) {
  *
  * NOTE, DOES NOT CURRRENTLY WORK.
  */
-int menu(WINDOW *sidebar_w) {
-  if (!sidebar_w)
-    return -1;
+int menu(WINDOW *menu_w) {
+  if (!menu_w)
+    return NULL_INPUT;
 
+  wclear(menu_w);
+  box(menu, '|', '-');
+
+  getch();
+  return 1;
+  /*
   char *messages[3] = {"1. go back:", "2. edit settings:", "3. exit:"};
 
-  int selected = 1;
+  int selected = 0;
   while (TRUE) {
-    box(sidebar_w, '-', '|');
+    box(menu_w, '-', '|');
     for (int i = 0; i < 3; i++) {
       if (selected % 3 == i) {
-        wattron(sidebar_w, A_STANDOUT);
-        mvwaddstr(sidebar_w, i + 8, 1, messages[i]);
-        mvwaddch(sidebar_w, i + 8, 0, ACS_RARROW);
-        wattroff(sidebar_w, A_STANDOUT);
+        wattron(menu_w, A_STANDOUT);
+        mvwaddstr(menu_w, i + 8, 1, messages[i]);
+        mvwaddch(menu_w, i + 8, 0, ACS_RARROW);
+        wattroff(menu_w, A_STANDOUT);
         continue;
       }
-      mvwaddstr(sidebar_w, i + 8, 1, messages[i]);
+      mvwaddstr(menu_w, i + 8, 1, messages[i]);
     }
     int action = getch();
 
@@ -263,5 +271,5 @@ int menu(WINDOW *sidebar_w) {
 
   selected = selected % 3;
 
-  return selected;
+  return selected;*/
 }
