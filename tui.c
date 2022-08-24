@@ -2,6 +2,7 @@
 #include "init.h"
 #include "encrypt.h"
 
+#include <ctype.h>
 #include <ncurses.h>
 #include <stdio.h>
 #include <string.h>
@@ -86,22 +87,24 @@ int main(int argc, char **argv) {
     }
 
     //reading in letters
-    if (is_alpha(action)) {
-      action = tolower(action);
+    if (islower(action)) {
       draw_keyboard(keyboard_w, action);
       cipher[i] = encrypt_letter(&sesh, (char) action);
       plain[i] = action;
       draw_output(output_w, plain, cipher);
     }
-
-    // non alphabetic (no encrypting)
+    else if (isupper(action)) {
+      draw_keyboard(keyboard_w, action);
+      cipher[i] = toupper(encrypt_letter(&sesh, (char) tolower(action)));
+      plain[i] = action;
+      draw_output(output_w, plain, cipher);
+    }
     else if ((action >= 32) && (action <= 126)) {
+      draw_keyboard(keyboard_w, 0);
       plain[i] = action;
       cipher[i] = action;
       draw_output(output_w, plain, cipher);
     }
-
-    //escape
     else if (action == 27) {
       break; //only way to escape unless clearing the buffers fails.
       //show menu
