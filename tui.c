@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
   //-------------------WINDOWS-------------------------
   WINDOW *header_w = subwin(stdscr, 9, XMAX,  0, 0);
   WINDOW *keyboard_w = newwin(20, XMAX - 2, YMAX - 21, 1);
-  WINDOW *output_w = newwin(3, XMAX - 2, 31, 1);
+  WINDOW *output_w = newwin(3, XMAX - 4, 31, 2);
   WINDOW *menu_w = newwin(YMAX - 10, XMAX - 10, 5, 5);
 
   //-------------------VARIABLES-----------------------
@@ -65,7 +65,6 @@ int main(int argc, char **argv) {
 
   //MAIN_LOOP
   while (TRUE) {
-    //wclear(output_w);
     int action = getch();
     //storing buffers into a file
     if (strlen(plain) == 128) {
@@ -83,37 +82,22 @@ int main(int argc, char **argv) {
 
     //reading in letters
     if (islower(action)) {
-      draw_keyboard(keyboard_w, action);
       cipher[i] = encrypt_letter(&sesh, (char) action);
       plain[i] = action;
+      draw_keyboard(keyboard_w, cipher[i]);
       draw_output(output_w, plain, cipher);
     }
     else if (isupper(action)) {
-      draw_keyboard(keyboard_w, action);
       cipher[i] = toupper(encrypt_letter(&sesh, (char) tolower(action)));
       plain[i] = action;
       draw_output(output_w, plain, cipher);
+      draw_keyboard(keyboard_w, cipher[i] + 32);
     }
     else if (action == 27) {
-      int status = menu(menu_w);
-      if (status == 0) {
-        clear();
-        draw_blank_scr(header_w);
-        wrefresh(header_w);
-        draw_keyboard(keyboard_w, 0);
-        wrefresh(keyboard_w);
-        wclear(output_w);
-        draw_output(output_w, plain, cipher);
-        wrefresh(output_w);
-        refresh();
-        continue;
-      }
-      else if ((status == -1) || (status == 2))
+      int status = menu(menu_w, header_w, keyboard_w, output_w, plain, cipher,
+                        &sesh);
+      if (status == -1)
         break;
-      else if (status == 3)
-        break; // to be replaced with a settings menu later
-      break; //only way to escape unless clearing the buffers fails.
-      //show menu
     }
     else {
       if ((action >= 32) && (action <= 126)) {
@@ -232,6 +216,7 @@ int draw_keyboard(WINDOW *keyboard_w, char key) {
  */
 
 int draw_output(WINDOW *output_w, char *plain, char *cipher) {
+  wclear(output_w);
   if ((!plain) || (!cipher))
     return ERROR;
 
@@ -248,8 +233,10 @@ int draw_output(WINDOW *output_w, char *plain, char *cipher) {
  *
  * NOTE, DOES NOT CURRRENTLY WORK.
  */
-int menu(WINDOW *menu_w) {
-  if (!menu_w)
+int menu(WINDOW *menu_w, WINDOW *header_w, WINDOW *keyboard_w, WINDOW *output_w,
+         char *plain, char *cipher, session_t **sesh_ptr) {
+  if ((!menu_w) || (!menu_w) || (!header_w) || (!keyboard_w) || (!output_w) ||
+      (!plain) || (!cipher) || (!sesh_ptr) || (!(*sesh_ptr)))
     return NULL_INPUT;
 
   wclear(menu_w);
@@ -262,7 +249,7 @@ int menu(WINDOW *menu_w) {
 
   while (TRUE) {
     for (int i = 0; i < 3; i++) {
-      if (selected % 3 == i) {
+      if ((3 + selected) % 3 == i) {
         wattron(menu_w, A_STANDOUT);
         mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, messages[i]);
         mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_RARROW);
@@ -278,11 +265,24 @@ int menu(WINDOW *menu_w) {
     int action = getch();
 
     if ((action == KEY_DOWN) || (action == '\t'))
-      selected++;
+      selected = (selected + 1) % 3;
     else if (action == KEY_UP)
-      selected--;
-    else if ((action == '\n') || (action == ' '))
-      break;
+      selected = (selected + 2) % 3;
+    else if ((action == '\n') || (action == ' ')) {
+      if ((3 + selected) % 3 == 0) {
+        reset_screen(header_w, keyboard_w, output_w, plain, cipher);
+        return 1;
+      }
+      else if ((3 + selected) % 3 == 1) {
+        draw_settings(menu_w, sesh_ptr);
+        wclear(menu_w);
+        wrefresh(menu_w);
+        refresh();
+      }
+      else {
+        return -1;
+      }
+    }
     else if (action == 27) // escape or alt
       return -1;
   }
@@ -291,34 +291,60 @@ int menu(WINDOW *menu_w) {
   return selected;
 }
 
+
+/* clears everything on the screen and re-displays it */
+int reset_screen(WINDOW *header_w, WINDOW *keyboard_w, WINDOW *output_w,
+                 char *plain, char *cipher) {
+  clear();
+  draw_blank_scr(header_w);
+  wrefresh(header_w);
+  draw_keyboard(keyboard_w, 0);
+  wrefresh(keyboard_w);
+  wclear(output_w);
+  draw_output(output_w, plain, cipher);
+  wrefresh(output_w);
+  refresh();
+
+  return 1;
+}
+
+/* I really hate the modulo opperator. a % b != (b + a) % b (no further comment)
+ */
 int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
+  wclear(menu_w);
+  box(menu_w, '|', '-');
+  wrefresh(menu_w);
+  refresh();
+
   if ((!menu_w) || (!sesh_ptr) || (!(*sesh_ptr)))
     return NULL_INPUT;
 
   session_t *sesh = *sesh_ptr;
-  char *headers[4] = {"Rotors: ", "Rotor settings: ", "Plugboard a: ",
-                 "Plugboard b: "};
+  char *headers[4] = {"Rotors:", "Rotor settings:", "Plugboard a:",
+                 "Plugboard b:"};
 
   int column = 0;
   int row = 0;
   int depth = 0;
 
   while (TRUE) {
+    column = (4 + column) % 4;
+    row = (10 + row) % 10;
     for (int i = 0; i < 4; i++) {
-      if (column % 4 == i) {
+      if ((4 + column) % 4 == i) {
         wattron(menu_w, A_STANDOUT);
-        mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
-        mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_RARROW);
+        mvwaddstr(menu_w, i + 8, XMAX / 2 - 19, headers[i]);
+        mvwaddch(menu_w, i + 8, XMAX / 2 - 20, ACS_RARROW);
         wattroff(menu_w, A_STANDOUT);
       }
       else {
-        mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
-        mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_DIAMOND);
+        mvwaddstr(menu_w, i + 8, XMAX / 2 - 19, headers[i]);
+        mvwaddch(menu_w, i + 8, XMAX / 2 - 20, ACS_DIAMOND);
       }
     }
 
     for (int j = 0; j < 3; j++) {
-      if ((row % 3 == j) && (column % 4 == 0)) {
+      if (((10 + row) % 10 == j) && ((4 + column) % 4 == 0)) {
         wattron(menu_w, A_STANDOUT);
         mvwaddch(menu_w, 8, XMAX / 2 - 2 + 2 * j, sesh -> r_pos[j] + 48);
         wattroff(menu_w, A_STANDOUT);
@@ -328,31 +354,32 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
     }
 
     for (int j = 0; j < 3; j++) {
-      if ((row % 3 == j) && column % 4 == 1) {
+      if (((3 + row) % 3 == j) && ((4 + column) % 4 == 1)) {
         wattron(menu_w, A_STANDOUT);
         mvwaddch(menu_w, 9, XMAX / 2 - 2 + 2 * j,
-                 sesh->rotors[sesh->r_pos[j]][sesh->r_set[j]]);
+                 sesh->rotors[sesh->r_pos[j]][(sesh->r_set[j]) % 26]);
         wattroff(menu_w, A_STANDOUT);
       }
-      else
+      else if (j < 3)
         mvwaddch(menu_w, 9, XMAX / 2 - 2 + 2 * j,
-                 sesh->rotors[sesh->r_pos[j]][sesh->r_set[j]]);
+                 sesh->rotors[sesh->r_pos[j]][(sesh->r_set[j]) % 26]);
     }
 
     for (int j = 0; j < 10; j++) {
       if ((row % 10 == j) && (column % 4 == 2)) {
         wattron(menu_w, A_STANDOUT);
         mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
-        wattron(menu_w,A_STANDOUT);
+        wattroff(menu_w,A_STANDOUT);
       }
       else
         mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
     }
+
     for (int j = 0; j < 10; j++) {
-      if ((row % 10 == j) && (column % 4 == 2)) {
+      if (((10 + row) % 10 == j) && ((4 + column) % 4 == 3)) {
         wattron(menu_w, A_STANDOUT);
         mvwaddch(menu_w, 11, XMAX / 2 - 2 + 2 * j, sesh->plug_bot[j]);
-        wattron(menu_w,A_STANDOUT);
+        wattroff(menu_w,A_STANDOUT);
       }
       else
         mvwaddch(menu_w, 11, XMAX / 2 - 2 + 2 * j, sesh->plug_bot[j]);
@@ -363,93 +390,61 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
 
     int action = getch();
 
-    switch (depth) {
-      case 0:
+    if ((3 + depth) % 3 == 0) {
         if (action == 27)
           return 0;
-        else if (action == KEY_DOWN)
+        else if ((action == KEY_DOWN) && (depth == 0))
           column++;
-        else if (action == KEY_UP)
-          column++;
+        else if ((action == KEY_UP) && (depth == 0))
+          column--;
         else if (action == '\n')
           depth++;
-        break;
-      case 1:
+    }
+
+    else if ((3 + depth) % 3 == 1) {
         if (action == KEY_RIGHT)
           row++;
         else if (action == KEY_LEFT)
           row--;
-        else if (action == 27)
+        else if (action == 27) {
+          row = 0;
           depth--;
+        }
         else if (action == '\n')
           depth++;
-        break;
-      case 2:
-        if ((action == 27) || (action == '\n'))
-          depth--;
-        if (action == KEY_DOWN) {
-          if (column % 4 == 0)
-            sesh->r_pos[row % 3]++;
-          else if (column % 4 == 1)
-            sesh->r_set[row % 3]++;
-          else if (column % 4 == 2)
-            sesh->plug_top[row % 3] = (sesh->plug_top[row % 3] - 96) % 26 + 97;
-          else
-            sesh->plug_bot[row % 3] = (sesh->plug_top[row % 3] - 96) % 26 + 97;
-        }
-        else if (action == KEY_UP){
-          if (column % 4 == 0)
-            sesh->r_pos[row % 3]--;
-          else if (column % 4 == 1)
-            sesh->r_set[row % 3]--;
-          else if (column % 4 == 2)
-            sesh->plug_top[row % 3] = (sesh->plug_top[row % 3] - 98) % 26 + 97;
-          else
-            sesh->plug_bot[row % 3] = (sesh->plug_top[row % 3] - 98) % 26 + 97;
-        }
-        break;
+    }
+
+    else if ((3 + depth) % 3 == 2) {
+      if ((action == 27) || (action == '\n'))
+        depth--;
+      if (action == KEY_DOWN) { // problem child making things -
+        if ((4 + column) % 4 == 0)
+          sesh->r_pos[(3 + row) % 3] = (8 + sesh->r_pos[(3 + row) % 3] + 1) % 8;
+        else if ((4 + column % 4) == 1)
+          sesh->r_set[(3 + row) % 3] = (26 + sesh->r_set[(3 + row) % 3] + 1) %
+                                       26;
+        else if (((4 + column) % 4) == 2)
+          sesh->plug_top[(3 + row) % 3] = 26 + (sesh->plug_top[(3 + row) % 3]
+                                           - 96) % 26 + 97;
+        else if ((4 + column) % 4 == 3)
+          sesh->plug_bot[(3 + row) % 3] = (sesh->plug_top[(3 + row) % 3] - 96)
+                                          % 26 + 97;
+      }
+      else if (action == KEY_UP) {
+        if ((4 + column) % 4 == 0)
+          sesh->r_pos[(3 + row) % 3] = 8 + (sesh->r_pos[(3 + row) % 3] - 1) % 8;
+        else if (column % 4 == 1)
+          sesh->r_set[(3 + row) % 3] = 26 + (sesh->r_set[(3 + row) % 3] - 1)
+                                       % 26;
+        else if (column % 4 == 2)
+          sesh->plug_top[(3 + row) % 3] = (26 + sesh->plug_top[(3 + row) % 3] 
+                                          - 98) % 26 + 97;
+        else
+          sesh->plug_bot[(3 + row) % 3] = (26 + (sesh->plug_top[row % 3] - 98))
+                                          % 26 + 97;
+      }
     }
   }
+
   return 1;
 }
-
-/*if ((!menu_w) || (!sesh_ptr) || (!(*sesh_ptr)))
-    return NULL_INPUT;
-
-  session_t *sesh = *sesh_ptr;
-  char *headers[4] = {"Rotors: ", "Rotor settings: ", "Plugboard a: ",
-                      "Plugboard b: "};
-  int column = 0;
-  int row = 0;
-  int depth = 0; // 0 = column, 1 = row, 2 = selecting char.
-
-  while (TRUE) {
-    switch (depth) {
-      case (0):
-        for (int i = 0; i < 4; i++) {
-          if (column % 4 == i) {
-            wattron(menu_w, A_STANDOUT);
-            mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
-            mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_RARROW);
-            wattroff(menu_w, A_STANDOUT);
-          }
-          else {
-              mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
-            mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_DIAMOND);
-          }
-        }
-
-        wrefresh(menu_w);
-        refresh();
-        int action = getch();
-
-        if (action == KEY_DOWN)
-          column++;
-        else if (action == KEY_UP)
-          column--;
-        else if (action == 27)
-          return 0;
-        else if (action == '\n')
-          depth++;
-        break; //case 0
- */

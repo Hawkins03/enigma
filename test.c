@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
+  /*
   clear_messages(".message.txt");
   char *message = malloc(129);
 
@@ -40,5 +41,8 @@ int main(int argc, char *argv[]) {
 
   free(message);
   message = NULL;
+  return 0;*/
+
+  printf("%d", (-1) / 26 * 26);
   return 0;
 }
