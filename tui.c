@@ -291,71 +291,125 @@ int menu(WINDOW *menu_w) {
   return selected;
 }
 
-int draw_settings(WINDOW *menu_w, session_t **sesh_ptr, int column, int row) {
+int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
   if ((!menu_w) || (!sesh_ptr) || (!(*sesh_ptr)))
     return NULL_INPUT;
 
   session_t *sesh = *sesh_ptr;
   char *headers[4] = {"Rotors: ", "Rotor settings: ", "Plugboard a: ",
-                      "Plugboard b: "};
+                 "Plugboard b: "};
 
-  for (int i = 0; i < 4; i++) {
-    if (column % 4 == i) {
-      wattron(menu_w, A_STANDOUT);
-      mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
-      mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_RARROW);
-      wattroff(menu_w, A_STANDOUT);
+  int column = 0;
+  int row = 0;
+  int depth = 0;
+
+  while (TRUE) {
+    for (int i = 0; i < 4; i++) {
+      if (column % 4 == i) {
+        wattron(menu_w, A_STANDOUT);
+        mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
+        mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_RARROW);
+        wattroff(menu_w, A_STANDOUT);
+      }
+      else {
+        mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
+        mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_DIAMOND);
+      }
     }
-    else {
-      mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
-      mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_DIAMOND);
+
+    for (int j = 0; j < 3; j++) {
+      if ((row % 3 == j) && (column % 4 == 0)) {
+        wattron(menu_w, A_STANDOUT);
+        mvwaddch(menu_w, 8, XMAX / 2 - 2 + 2 * j, sesh -> r_pos[j] + 48);
+        wattroff(menu_w, A_STANDOUT);
+      }
+      else
+        mvwaddch(menu_w, 8, XMAX / 2 - 2 + 2 * j, sesh -> r_pos[j] + 48);
+    }
+
+    for (int j = 0; j < 3; j++) {
+      if ((row % 3 == j) && column % 4 == 1) {
+        wattron(menu_w, A_STANDOUT);
+        mvwaddch(menu_w, 9, XMAX / 2 - 2 + 2 * j,
+                 sesh->rotors[sesh->r_pos[j]][sesh->r_set[j]]);
+        wattroff(menu_w, A_STANDOUT);
+      }
+      else
+        mvwaddch(menu_w, 9, XMAX / 2 - 2 + 2 * j,
+                 sesh->rotors[sesh->r_pos[j]][sesh->r_set[j]]);
+    }
+
+    for (int j = 0; j < 10; j++) {
+      if ((row % 10 == j) && (column % 4 == 2)) {
+        wattron(menu_w, A_STANDOUT);
+        mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
+        wattron(menu_w,A_STANDOUT);
+      }
+      else
+        mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
+    }
+    for (int j = 0; j < 10; j++) {
+      if ((row % 10 == j) && (column % 4 == 2)) {
+        wattron(menu_w, A_STANDOUT);
+        mvwaddch(menu_w, 11, XMAX / 2 - 2 + 2 * j, sesh->plug_bot[j]);
+        wattron(menu_w,A_STANDOUT);
+      }
+      else
+        mvwaddch(menu_w, 11, XMAX / 2 - 2 + 2 * j, sesh->plug_bot[j]);
+    }
+
+    wrefresh(menu_w);
+    refresh();
+
+    int action = getch();
+
+    switch (depth) {
+      case 0:
+        if (action == 27)
+          return 0;
+        else if (action == KEY_DOWN)
+          column++;
+        else if (action == KEY_UP)
+          column++;
+        else if (action == '\n')
+          depth++;
+        break;
+      case 1:
+        if (action == KEY_RIGHT)
+          row++;
+        else if (action == KEY_LEFT)
+          row--;
+        else if (action == 27)
+          depth--;
+        else if (action == '\n')
+          depth++;
+        break;
+      case 2:
+        if ((action == 27) || (action == '\n'))
+          depth--;
+        if (action == KEY_DOWN) {
+          if (column % 4 == 0)
+            sesh->r_pos[row % 3]++;
+          else if (column % 4 == 1)
+            sesh->r_set[row % 3]++;
+          else if (column % 4 == 2)
+            sesh->plug_top[row % 3] = (sesh->plug_top[row % 3] - 96) % 26 + 97;
+          else
+            sesh->plug_bot[row % 3] = (sesh->plug_top[row % 3] - 96) % 26 + 97;
+        }
+        else if (action == KEY_UP){
+          if (column % 4 == 0)
+            sesh->r_pos[row % 3]--;
+          else if (column % 4 == 1)
+            sesh->r_set[row % 3]--;
+          else if (column % 4 == 2)
+            sesh->plug_top[row % 3] = (sesh->plug_top[row % 3] - 98) % 26 + 97;
+          else
+            sesh->plug_bot[row % 3] = (sesh->plug_top[row % 3] - 98) % 26 + 97;
+        }
+        break;
     }
   }
-
-  for (int j = 0; j < 3; j++) {
-    if ((row % 3 == j) && (column % 4 == 0)) {
-      wattron(menu_w, A_STANDOUT);
-      mvwaddch(menu_w, 8, XMAX / 2 - 2 + 2 * j, sesh -> r_pos[j] + 48);
-      wattroff(menu_w, A_STANDOUT);
-    }
-    else
-      mvwaddch(menu_w, 8, XMAX / 2 - 2 + 2 * j, sesh -> r_pos[j] + 48);
-  }
-
-  for (int j = 0; j < 3; j++) {
-    if ((row % 3 == j) && column % 4 == 1) {
-      wattron(menu_w, A_STANDOUT);
-      mvwaddch(menu_w, 9, XMAX / 2 - 2 + 2 * j,
-               sesh->rotors[sesh->r_pos[j]][sesh->r_set[j]]);
-      wattroff(menu_w, A_STANDOUT);
-    }
-    else
-      mvwaddch(menu_w, 9, XMAX / 2 - 2 + 2 * j,
-               sesh->rotors[sesh->r_pos[j]][sesh->r_set[j]]);
-  }
-
-  for (int j = 0; j < 10; j++) {
-    if ((row % 10 == j) && (column % 4 == 2)) {
-      wattron(menu_w, A_STANDOUT);
-      mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
-      wattron(menu_w,A_STANDOUT);
-    }
-    else
-      mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
-  }
-  for (int j = 0; j < 10; j++) {
-    if ((row % 10 == j) && (column % 4 == 2)) {
-      wattron(menu_w, A_STANDOUT);
-      mvwaddch(menu_w, 11, XMAX / 2 - 2 + 2 * j, sesh->plug_bot[j]);
-      wattron(menu_w,A_STANDOUT);
-    }
-    else
-      mvwaddch(menu_w, 11, XMAX / 2 - 2 + 2 * j, sesh->plug_bot[j]);
-  }
-
-
-  wrefresh(menu_w);
-  refresh();
   return 1;
 }
 

@@ -17,6 +17,6 @@ int draw_blank_scr(WINDOW *header_w);
 int draw_keyboard(WINDOW *keyboard_w, char key);
 int draw_output(WINDOW *output_w, char *plain, char *cipher);
 int menu(WINDOW *menu_w);
-int draw_settings(WINDOW *menu_w, session_t **sesh_ptr, int column, int row);
+int draw_settings(WINDOW *menu_w, session_t **sesh_ptr);
 
 #endif   /* TUI_h */
