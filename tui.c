@@ -1,13 +1,5 @@
 #include "tui.h"
-#include "init.h"
-#include "encrypt.h"
 
-#include <ctype.h>
-#include <ncurses.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdlib.h>
 
 static int YMAX, XMAX = 0;
 
@@ -73,7 +65,7 @@ int main(int argc, char **argv) {
 
   //MAIN_LOOP
   while (TRUE) {
-    wclear(output_w);
+    //wclear(output_w);
     int action = getch();
     //storing buffers into a file
     if (strlen(plain) == 128) {
@@ -110,6 +102,7 @@ int main(int argc, char **argv) {
         wrefresh(header_w);
         draw_keyboard(keyboard_w, 0);
         wrefresh(keyboard_w);
+        wclear(output_w);
         draw_output(output_w, plain, cipher);
         wrefresh(output_w);
         refresh();
@@ -232,7 +225,10 @@ int draw_keyboard(WINDOW *keyboard_w, char key) {
  *
  * CURRENTLY KNOWN ERRORS:
  * if a non-alphabet character is typed, the function doesn't write anything
- * to the screen
+ * to the screen  - FIXED
+ *
+ * currently this is way too innefecient. After I finish drawing settings, I'm
+ * going to make it just draw the singular character that was used.
  */
 
 int draw_output(WINDOW *output_w, char *plain, char *cipher) {
@@ -294,3 +290,112 @@ int menu(WINDOW *menu_w) {
   selected = selected % 3;
   return selected;
 }
+
+int draw_settings(WINDOW *menu_w, session_t **sesh_ptr, int column, int row) {
+  if ((!menu_w) || (!sesh_ptr) || (!(*sesh_ptr)))
+    return NULL_INPUT;
+
+  session_t *sesh = *sesh_ptr;
+  char *headers[4] = {"Rotors: ", "Rotor settings: ", "Plugboard a: ",
+                      "Plugboard b: "};
+
+  for (int i = 0; i < 4; i++) {
+    if (column % 4 == i) {
+      wattron(menu_w, A_STANDOUT);
+      mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
+      mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_RARROW);
+      wattroff(menu_w, A_STANDOUT);
+    }
+    else {
+      mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
+      mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_DIAMOND);
+    }
+  }
+
+  for (int j = 0; j < 3; j++) {
+    if ((row % 3 == j) && (column % 4 == 0)) {
+      wattron(menu_w, A_STANDOUT);
+      mvwaddch(menu_w, 8, XMAX / 2 - 2 + 2 * j, sesh -> r_pos[j] + 48);
+      wattroff(menu_w, A_STANDOUT);
+    }
+    else
+      mvwaddch(menu_w, 8, XMAX / 2 - 2 + 2 * j, sesh -> r_pos[j] + 48);
+  }
+
+  for (int j = 0; j < 3; j++) {
+    if ((row % 3 == j) && column % 4 == 1) {
+      wattron(menu_w, A_STANDOUT);
+      mvwaddch(menu_w, 9, XMAX / 2 - 2 + 2 * j,
+               sesh->rotors[sesh->r_pos[j]][sesh->r_set[j]]);
+      wattroff(menu_w, A_STANDOUT);
+    }
+    else
+      mvwaddch(menu_w, 9, XMAX / 2 - 2 + 2 * j,
+               sesh->rotors[sesh->r_pos[j]][sesh->r_set[j]]);
+  }
+
+  for (int j = 0; j < 10; j++) {
+    if ((row % 10 == j) && (column % 4 == 2)) {
+      wattron(menu_w, A_STANDOUT);
+      mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
+      wattron(menu_w,A_STANDOUT);
+    }
+    else
+      mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
+  }
+  for (int j = 0; j < 10; j++) {
+    if ((row % 10 == j) && (column % 4 == 2)) {
+      wattron(menu_w, A_STANDOUT);
+      mvwaddch(menu_w, 11, XMAX / 2 - 2 + 2 * j, sesh->plug_bot[j]);
+      wattron(menu_w,A_STANDOUT);
+    }
+    else
+      mvwaddch(menu_w, 11, XMAX / 2 - 2 + 2 * j, sesh->plug_bot[j]);
+  }
+
+
+  wrefresh(menu_w);
+  refresh();
+  return 1;
+}
+
+/*if ((!menu_w) || (!sesh_ptr) || (!(*sesh_ptr)))
+    return NULL_INPUT;
+
+  session_t *sesh = *sesh_ptr;
+  char *headers[4] = {"Rotors: ", "Rotor settings: ", "Plugboard a: ",
+                      "Plugboard b: "};
+  int column = 0;
+  int row = 0;
+  int depth = 0; // 0 = column, 1 = row, 2 = selecting char.
+
+  while (TRUE) {
+    switch (depth) {
+      case (0):
+        for (int i = 0; i < 4; i++) {
+          if (column % 4 == i) {
+            wattron(menu_w, A_STANDOUT);
+            mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
+            mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_RARROW);
+            wattroff(menu_w, A_STANDOUT);
+          }
+          else {
+              mvwaddstr(menu_w, i + 8, XMAX / 2 - 10, headers[i]);
+            mvwaddch(menu_w, i + 8, XMAX / 2 - 11, ACS_DIAMOND);
+          }
+        }
+
+        wrefresh(menu_w);
+        refresh();
+        int action = getch();
+
+        if (action == KEY_DOWN)
+          column++;
+        else if (action == KEY_UP)
+          column--;
+        else if (action == 27)
+          return 0;
+        else if (action == '\n')
+          depth++;
+        break; //case 0
+ */
