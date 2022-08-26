@@ -294,13 +294,16 @@ int append_message(int *msg_num, char *message, char *file_name) {
  */
 
 char *read_message(int total_msg_num, char *file_name) {
-  if (!file_name)
+  if (!file_name) {
+    printf("File name failed\n");
     return NULL;
+  }
   FILE *in_file = NULL;
   in_file = fopen(file_name, "r");
 
   char *message = malloc(128 * total_msg_num + 1);
   if (!message) {
+    printf("message malloc failed\n");
     return NULL;
   }
 
@@ -313,6 +316,7 @@ char *read_message(int total_msg_num, char *file_name) {
 
       fclose(in_file);
       in_file = NULL;
+      printf("fscanf failed\n");
       return NULL;
     }
 
@@ -322,6 +326,8 @@ char *read_message(int total_msg_num, char *file_name) {
     message[128] = '-';
   message[128 * total_msg_num] = '\0';
 
+  if (!message)
+    printf("MESSAGE IS NULL!!\n");
   return message;
 }
 
@@ -341,7 +347,7 @@ int print_messages(int total_msg_num, char *file_name) {
 
   for (int i = 0; i < total_msg_num; i++) {
     char buff[129] = {0};
-    int status = fscanf(in_file, "%128[a-zA-Z]", buff);
+    int status = fscanf(in_file, "%128[a-zA-Z]", buff); // error line
     if (status != 1) {
       fclose(in_file);
       in_file = NULL;

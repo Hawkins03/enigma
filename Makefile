@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Werror
+CFLAGS = -Wall -Werror -g
 DEPS = init.h encrypt.h term.h
 
 %.o: %.c $(DEPS)
@@ -15,4 +15,4 @@ debug: debug.o encrypt.o init.o
 
 .phony: clean
 clean:
-	rm *.o encrypt debug tui
+	rm *.o encrypt debug tui .message.txt .plaintext.txt .ciphertext.txt
