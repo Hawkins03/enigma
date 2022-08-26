@@ -11,7 +11,6 @@
 #ifndef TUI_H
 
 #define MENU_CURSOR   (ACS_RARROW)
-#define ERROR         (-1)
 
 int draw_blank_scr(WINDOW *header_w);
 int draw_keyboard(WINDOW *keyboard_w, char key);

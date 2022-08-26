@@ -5,15 +5,15 @@
 #include <stdlib.h>
 
 // all 8 rotors that you can select plus the reflector.
-const char G_ROTORS[9][27] = {"ekmflgdqvzntowyhxuspaibrcj",
-                               "ajdksiruxblhwtmcqgznpyfvoe",
-                               "bdfhjlcprtxvznyeiwgakmusqo",
-                               "esovpzjayquirhxlnftgkdcmwb",
-                               "vzbrgityupsdnhlxawmjqofeck",
-                               "jpgvoumfyqbenhzrdkasxlitcw",
-                               "nzjhgrcxmyswboufaivlpekqdt",
-                               "fkqhtlxocbjspdzramewniuygv",
-                               "ejmzalyxvbwfcrquontspikhgd"};
+static const char G_ROTORS[9][27] = {"ekmflgdqvzntowyhxuspaibrcj",
+                                     "ajdksiruxblhwtmcqgznpyfvoe",
+                                     "bdfhjlcprtxvznyeiwgakmusqo",
+                                     "esovpzjayquirhxlnftgkdcmwb",
+                                     "vzbrgityupsdnhlxawmjqofeck",
+                                     "jpgvoumfyqbenhzrdkasxlitcw",
+                                     "nzjhgrcxmyswboufaivlpekqdt",
+                                     "fkqhtlxocbjspdzramewniuygv",
+                                     "ejmzalyxvbwfcrquontspikhgd"};
 
 /*
  * prints a display of all the settings saved in the session.

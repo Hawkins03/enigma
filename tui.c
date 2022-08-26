@@ -1,16 +1,33 @@
 #include "tui.h"
 
+static int XMAX = 0;
+static int YMAX = 0;
+static int MENU_MARGIN = 5;
 
-static int YMAX, XMAX = 0;
-
-
-
-/*
- * Weird error documentation:
- * MAKE SURE THAT YOU RESET I IF YOU HIT THE END OF THE BUFFER, THIS CAUSES AN
- * OVERFLOW. (look into a nested for loop in the while loop)
+/* TODO:
+ *  - make more better and check to see why the screen flickers when you type
+ *  fast enough
  *
- * Capture dies if you try and enter a non-alphabetic character.
+ *  - add visualization of r_set + r_pos under the header
+ *    (like the real version)
+ *
+ *  - make sure to just put this in a for loops (size 128) that auto-resets
+ *  i and plain, etc.
+ *
+ *  - add documentation
+ *
+ *  - add help strings
+ *
+ *  - move display_output into 2 functions
+ *
+ *  - move the refrence to reset_screen out of menu
+ *
+ * ERROR DOCUMENTATION:
+ * 1. if you stack overflow around when you get to the end of the buffer, make
+ * sure i is being reset when you hit 128 characters. -- FIXED
+ *
+ * 2. make sure to include exceptions if a user hits a non alphabetic character
+ *      -- FIXED
  */
 
 int main(int argc, char **argv) {
@@ -30,43 +47,36 @@ int main(int argc, char **argv) {
   /*
    * window breakdown:
    * header: top of screen
-   * setting: left side, below header, shows settings
-   * active: entire space below header
-   * inactive: replaces active besides settings
    * keyboard: where the "keyboard" shows up
    * output: where I output the results
+   * menu: the whole screen - the margin
    */
 
   //-------------------WINDOWS-------------------------
   WINDOW *header_w = subwin(stdscr, 9, XMAX,  0, 0);
   WINDOW *keyboard_w = newwin(20, XMAX - 2, YMAX - 21, 1);
   WINDOW *output_w = newwin(3, XMAX - 4, 31, 2);
-  WINDOW *menu_w = newwin(YMAX - 10, XMAX - 10, 5, 5);
+  WINDOW *menu_w = newwin(YMAX - 2 * MENU_MARGIN, XMAX - 2 * MENU_MARGIN,
+                          MENU_MARGIN, MENU_MARGIN);
 
   //-------------------VARIABLES-----------------------
   session_t *sesh = get_settings();
   char plain[129] = { 0 };
   char cipher[129] = { 0 };
-
-
   int i = 0;
 
   //-------------------STARTUP-------------------------
   clear_messages(".plaintext.txt");
   clear_messages(".ciphertext.txt");
+
   draw_blank_scr(header_w);
   draw_keyboard(keyboard_w, 0);
   draw_output(output_w, plain, cipher);
   refresh();
 
-
-  /* two different variables because they're not supposed to be messed with by
-     the user */
-
-  //MAIN_LOOP
   while (TRUE) {
     int action = getch();
-    //storing buffers into a file
+    // ----------------CLEARING BUFFER----------------
     if (strlen(plain) == 128) {
       int status = append_message(plain_messages, plain, ".plaintext.txt");
       if (status != 1)
@@ -74,31 +84,33 @@ int main(int argc, char **argv) {
       status = append_message(cipher_messages, cipher, ".ciphertext.txt");
       if (status != 1)
         break;
-      i = 0; // VERY IMPORTANT
-      //clear buffers
+      i = 0;
       memset(plain, 0, strlen(plain));
       memset(cipher, 0, strlen(cipher));
     }
 
-    //reading in letters
+    // ----------------ENCRYPTING---------------------
     if (islower(action)) {
       cipher[i] = encrypt_letter(&sesh, (char) action);
       plain[i] = action;
       draw_keyboard(keyboard_w, cipher[i]);
       draw_output(output_w, plain, cipher);
     }
+
     else if (isupper(action)) {
       cipher[i] = toupper(encrypt_letter(&sesh, (char) tolower(action)));
       plain[i] = action;
       draw_output(output_w, plain, cipher);
       draw_keyboard(keyboard_w, cipher[i] + 32);
     }
+    // escape key -> menu
     else if (action == 27) {
       int status = menu(menu_w, header_w, keyboard_w, output_w, plain, cipher,
                         &sesh);
       if (status == -1)
         break;
     }
+    // other keypresses
     else {
       if ((action >= 32) && (action <= 126)) {
         plain[i] = action;
@@ -154,17 +166,21 @@ int draw_blank_scr(WINDOW *header_w) {
   return 1;
 }
 
-/* displays a keyboard, and highlights the selected key.
+/*
+ * displays a keyboard, and highlights the selected key.
+ * to not highlight a key, just set key to -1.
  *
- * returns the position of 
+ * no return because no error opportunities.
  */
 int draw_keyboard(WINDOW *keyboard_w, char key) {
+  if (!keyboard_w)
+    return -1;
   // if you have a different layout, edit here
   char *key_order = "qwertyuiopasdfghjklzxcvbnm";
 
   // finding size of keyboard
-  int a_xmax, a_ymax = 0;
-  getmaxyx(keyboard_w, a_ymax, a_xmax);
+  int key_xmax, key_ymax = 0;
+  getmaxyx(keyboard_w, key_ymax, key_xmax);
 
   // finding right key to highlight
   int highlighted_key = -1;
@@ -176,16 +192,16 @@ int draw_keyboard(WINDOW *keyboard_w, char key) {
   int x_pos, y_pos = 0;
   for (int i = 0; i < 26; i++) {
     if (i <= 9) {
-      y_pos = a_ymax - 17;
-      x_pos = a_xmax / 2 + i * 9 - 41;
+      y_pos = key_ymax - 17;
+      x_pos = key_xmax / 2 + i * 9 - 41;
     }
     else if (i <= 18) {
-      y_pos = a_ymax - 10;
-      x_pos = a_xmax / 2 + (i - 9) * 9 - 46;
+      y_pos = key_ymax - 10;
+      x_pos = key_xmax / 2 + (i - 9) * 9 - 46;
     }
     else {
-      y_pos = a_ymax - 3;
-      x_pos = a_xmax / 2 + (i - 18) * 9 - 41;
+      y_pos = key_ymax - 3;
+      x_pos = key_xmax / 2 + (i - 18) * 9 - 41;
     }
 
     // displaying keys
@@ -199,26 +215,19 @@ int draw_keyboard(WINDOW *keyboard_w, char key) {
     }
   }
   wrefresh(keyboard_w);
-  return highlighted_key;
+  return 1;
 }
 
 /* displays the plain and ciphertext.
- * note, I'm investigating some weird error with this not displaying the
- * plaintext.
- *
- *
- * CURRENTLY KNOWN ERRORS:
- * if a non-alphabet character is typed, the function doesn't write anything
- * to the screen  - FIXED
- *
- * currently this is way too innefecient. After I finish drawing settings, I'm
- * going to make it just draw the singular character that was used.
+ * currently this function is ineffecient. I don't want to re-display everything
+ * each time I enter a key, I just want to have to display 1. (look into making
+ * another function to just display 1, and move this over to reset_screen)
  */
 
 int draw_output(WINDOW *output_w, char *plain, char *cipher) {
   wclear(output_w);
   if ((!plain) || (!cipher))
-    return ERROR;
+    return -1;
 
   wprintw(output_w, "Plaintext: %s\n", plain);
   wprintw(output_w, "\nCiphertext: %s\n", cipher);
@@ -231,23 +240,28 @@ int draw_output(WINDOW *output_w, char *plain, char *cipher) {
 /* Displays a menu allowing you to either return to normal use, edit setting,
  * or exit from the program.
  *
- * NOTE, DOES NOT CURRRENTLY WORK.
+ * has three options that you can navigate using arrow keys:
+ * 1. go back (go back to normal functioning)
+ * 2. edit settings (if you have a specific setting you want to use)
+ * 3. exit to the terminal (can just hit esc again as well.)
  */
-int menu(WINDOW *menu_w, WINDOW *header_w, WINDOW *keyboard_w, WINDOW *output_w,
-         char *plain, char *cipher, session_t **sesh_ptr) {
+int menu(WINDOW *menu_w, WINDOW *header_w, WINDOW *keyboard_w,
+         WINDOW *output_w, char *plain, char *cipher, session_t **sesh_ptr) {
+  // does everything I'm using exist?
   if ((!menu_w) || (!menu_w) || (!header_w) || (!keyboard_w) || (!output_w) ||
       (!plain) || (!cipher) || (!sesh_ptr) || (!(*sesh_ptr)))
     return NULL_INPUT;
 
+  //clearing the screen
   wclear(menu_w);
   wrefresh(menu_w);
   box(menu_w, '|', '-');
 
   char *messages[3] = {"1. go back:", "2. edit settings:", "3. exit:"};
-
   int selected = 0;
 
   while (TRUE) {
+    // displaying the menu
     for (int i = 0; i < 3; i++) {
       if ((3 + selected) % 3 == i) {
         wattron(menu_w, A_STANDOUT);
@@ -262,28 +276,30 @@ int menu(WINDOW *menu_w, WINDOW *header_w, WINDOW *keyboard_w, WINDOW *output_w,
     }
     wrefresh(menu_w);
     refresh();
-    int action = getch();
 
+    // getting an input
+    int action = getch();
     if ((action == KEY_DOWN) || (action == '\t'))
       selected = (selected + 1) % 3;
     else if (action == KEY_UP)
       selected = (selected + 2) % 3;
     else if ((action == '\n') || (action == ' ')) {
-      if ((3 + selected) % 3 == 0) {
+      // selected an option
+      if ((3 + selected) % 3 == 0) { // go back
         reset_screen(header_w, keyboard_w, output_w, plain, cipher);
         return 1;
       }
-      else if ((3 + selected) % 3 == 1) {
+      else if ((3 + selected) % 3 == 1) { // edit settings
         draw_settings(menu_w, sesh_ptr);
         wclear(menu_w);
         wrefresh(menu_w);
         refresh();
       }
-      else {
+      else { // quit application
         return -1;
       }
     }
-    else if (action == 27) // escape or alt
+    else if (action == 27) // quit application pt 2.
       return -1;
   }
 
@@ -292,7 +308,9 @@ int menu(WINDOW *menu_w, WINDOW *header_w, WINDOW *keyboard_w, WINDOW *output_w,
 }
 
 
-/* clears everything on the screen and re-displays it */
+/* clears everything on the screen and re-displays it after going back from
+ * using the menu - i.e. the reason why menu is so bloated.
+ */
 int reset_screen(WINDOW *header_w, WINDOW *keyboard_w, WINDOW *output_w,
                  char *plain, char *cipher) {
   clear();
@@ -308,16 +326,35 @@ int reset_screen(WINDOW *header_w, WINDOW *keyboard_w, WINDOW *output_w,
   return 1;
 }
 
-/* I really hate the modulo opperator. a % b != (b + a) % b (no further comment)
+/* I really hate that math doesn't work how I want it to.
+ * Like any normal person, I use modulo to loop around numbers when I need a
+ * display to go from index 0 to index max. I spent about half an hour figuring
+ * out that
+ * a % b != (b + a) % b
+ *
+ * fyi:
+ * ((-1) / 26) * 26 + (-1) % 26 = -1
+ * (0) * 26 + (-1) % 26 = -1
+ * 0 + (-1) % 26 = -1
+ * (-1) % 26 = -1
+ *
+ * solution:
+ * a % b -- NO
+ * (b + a) % b -- YES
+ *
+ * anyways, this function displays the settings and then kicks out to menu when
+ * needed. It's really cardboard and duct-tape, so I've got to improve it later.
  */
 int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
+  //does everything exist?
+  if ((!menu_w) || (!sesh_ptr) || (!(*sesh_ptr)))
+    return NULL_INPUT;
+
+  //clear the screen
   wclear(menu_w);
   box(menu_w, '|', '-');
   wrefresh(menu_w);
   refresh();
-
-  if ((!menu_w) || (!sesh_ptr) || (!(*sesh_ptr)))
-    return NULL_INPUT;
 
   session_t *sesh = *sesh_ptr;
   char *headers[4] = {"Rotors:", "Rotor settings:", "Plugboard a:",
@@ -330,6 +367,7 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
   while (TRUE) {
     column = (4 + column) % 4;
     row = (10 + row) % 10;
+    //displaying rows:
     for (int i = 0; i < 4; i++) {
       if ((4 + column) % 4 == i) {
         wattron(menu_w, A_STANDOUT);
@@ -343,6 +381,7 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
       }
     }
 
+    //displaying rotors
     for (int j = 0; j < 3; j++) {
       if (((10 + row) % 10 == j) && ((4 + column) % 4 == 0)) {
         wattron(menu_w, A_STANDOUT);
@@ -353,6 +392,7 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
         mvwaddch(menu_w, 8, XMAX / 2 - 2 + 2 * j, sesh -> r_pos[j] + 48);
     }
 
+    //displaying rotor settings
     for (int j = 0; j < 3; j++) {
       if (((3 + row) % 3 == j) && ((4 + column) % 4 == 1)) {
         wattron(menu_w, A_STANDOUT);
@@ -365,6 +405,7 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
                  sesh->rotors[sesh->r_pos[j]][(sesh->r_set[j]) % 26]);
     }
 
+    //displaying plugboard a
     for (int j = 0; j < 10; j++) {
       if ((row % 10 == j) && (column % 4 == 2)) {
         wattron(menu_w, A_STANDOUT);
@@ -375,6 +416,7 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
         mvwaddch(menu_w, 10, XMAX / 2 - 2 + 2 * j, sesh->plug_top[j]);
     }
 
+    //displaying plugboard b
     for (int j = 0; j < 10; j++) {
       if (((10 + row) % 10 == j) && ((4 + column) % 4 == 3)) {
         wattron(menu_w, A_STANDOUT);
@@ -390,6 +432,7 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
 
     int action = getch();
 
+    //selecting row
     if ((3 + depth) % 3 == 0) {
         if (action == 27)
           return 0;
@@ -401,6 +444,7 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
           depth++;
     }
 
+    //selecting thing to edit
     else if ((3 + depth) % 3 == 1) {
         if (action == KEY_RIGHT)
           row++;
@@ -414,37 +458,37 @@ int draw_settings(WINDOW *menu_w, session_t **sesh_ptr) {
           depth++;
     }
 
+    // editing thing.
     else if ((3 + depth) % 3 == 2) {
       if ((action == 27) || (action == '\n'))
         depth--;
-      if (action == KEY_DOWN) { // problem child making things -
-        if ((4 + column) % 4 == 0)
+      if (action == KEY_DOWN) { // ADD
+        if ((4 + column) % 4 == 0) // rotor
           sesh->r_pos[(3 + row) % 3] = (8 + sesh->r_pos[(3 + row) % 3] + 1) % 8;
-        else if ((4 + column % 4) == 1)
+        else if ((4 + column % 4) == 1) // rotor setting
           sesh->r_set[(3 + row) % 3] = (26 + sesh->r_set[(3 + row) % 3] + 1) %
                                        26;
-        else if (((4 + column) % 4) == 2)
+        else if (((4 + column) % 4) == 2) // plugboard a
           sesh->plug_top[(3 + row) % 3] = 26 + (sesh->plug_top[(3 + row) % 3]
                                            - 96) % 26 + 97;
-        else if ((4 + column) % 4 == 3)
+        else if ((4 + column) % 4 == 3) // plugboard b
           sesh->plug_bot[(3 + row) % 3] = (sesh->plug_top[(3 + row) % 3] - 96)
                                           % 26 + 97;
       }
-      else if (action == KEY_UP) {
-        if ((4 + column) % 4 == 0)
+      else if (action == KEY_UP) { // SUBTRACT
+        if ((4 + column) % 4 == 0) // rotor
           sesh->r_pos[(3 + row) % 3] = 8 + (sesh->r_pos[(3 + row) % 3] - 1) % 8;
-        else if (column % 4 == 1)
+        else if (column % 4 == 1) // rotor setting
           sesh->r_set[(3 + row) % 3] = 26 + (sesh->r_set[(3 + row) % 3] - 1)
                                        % 26;
-        else if (column % 4 == 2)
+        else if (column % 4 == 2) // plugboard a
           sesh->plug_top[(3 + row) % 3] = (26 + sesh->plug_top[(3 + row) % 3] 
                                           - 98) % 26 + 97;
-        else
+        else // plugboard b
           sesh->plug_bot[(3 + row) % 3] = (26 + (sesh->plug_top[row % 3] - 98))
                                           % 26 + 97;
       }
     }
   }
-
   return 1;
 }

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Werror -g
+CFLAGS = -Wall -Werror
 DEPS = init.h encrypt.h term.h
 
 %.o: %.c $(DEPS)
