@@ -77,6 +77,10 @@ int click(session_t **sesh_ptr, int rotor_num) {
 } /* click() */
 
 /*
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * IF THINGS GO WRONG REMOVE COMMENTING ON PRINTF STATMETS HERE!!!!!!!!!!!!!!!!!!!!!!!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
  * runs through a string encrypting letters (note, sets all letters to
  * lowercase (to be fixed)). Returns an error if plaintext points to NULL.
  *
@@ -114,6 +118,13 @@ int encrypt_string(char **plaintext_ptr) {
   return i;
 } /* encrypt_string() */
 
+
+/*
+ * encrypts a single char (does in fact update sesh after.)
+ *
+ * IF YOU HAVE PROBLEMS UNCOMMENT PRINTF STATMENTS.
+ *
+ */
 char encrypt_letter(session_t **sesh_ptr, char letter) {
   if ((!sesh_ptr) || (!*sesh_ptr) || (letter == 0))
     return -1;
