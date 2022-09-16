@@ -14,7 +14,7 @@ static int MENU_MARGIN = 5;
  *  - make sure to just put this in a for loops (size 128) that auto-resets
  *  i and plain, etc.
  *
- *  - add documentation
+ *  X add documentation
  *
  *  - add help strings
  *
@@ -24,7 +24,8 @@ static int MENU_MARGIN = 5;
  *
  * ERROR DOCUMENTATION:
  * 1. if you stack overflow around when you get to the end of the buffer, make
- * sure i is being reset when you hit 128 characters. -- FIXED
+ * sure i is being reset when you hit 128 characters. 
+ *      -- FIXED
  *
  * 2. make sure to include exceptions if a user hits a non alphabetic character
  *      -- FIXED
@@ -59,7 +60,8 @@ int main(int argc, char **argv) {
   WINDOW *menu_w = newwin(YMAX - 2 * MENU_MARGIN, XMAX - 2 * MENU_MARGIN,
                           MENU_MARGIN, MENU_MARGIN);
 
-  //-------------------VARIABLES-----------------------
+  //----    // if there is, then just do it.
+  //---------------VARIABLES-----------------------
   session_t *sesh = get_settings();
   char plain[129] = { 0 };
   char cipher[129] = { 0 };
