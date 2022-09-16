@@ -1,4 +1,3 @@
-# enigma
 A enigma machine I built using python origionally, and then rebuilt in C.
 - REQUIRED MODULE: ncurses (see below on how to install.)
 
