@@ -1,4 +1,4 @@
-A enigma machine I built using python origionally, and then rebuilt in C.
+A enigma machine I built using python origionally (check the "2018 version" branch), and then rebuilt in C.
 - REQUIRED MODULE: ncurses (see below on how to install.)
 
 There are two ways to use this program. First you run "Make tui" and then run
